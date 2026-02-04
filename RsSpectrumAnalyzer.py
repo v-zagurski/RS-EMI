@@ -6,7 +6,6 @@ Created on Tue Oct 14 08:33:07 2025
 """
 
 import numpy as np
-# from RsInstrument import RsInstrument
 from instmanager import InstrumentManager
 im = InstrumentManager()
 
@@ -93,7 +92,7 @@ class RsSpectrumAnalyzer:
     def initiate(self):
         self._called = False
         self._status = 'Сканирование...'
-        self.core.write('INIT:IMM')
+        self.core.write('INIT:IMM; *OPC')
         self._check_registers()
 
     def stop(self):
@@ -137,7 +136,7 @@ class RsSpectrumAnalyzer:
 
         esrval = float(self.core.query('*ESR?'))
         self._esr = regviewer(esrval)
-        if any(value in [2, 3, 4, 5] for value in self._esr):
+        if any(value in [3, 4, 5] for value in self._esr):
             err = self.core.query('SYST:ERR?')
             self._status = f'Обнаружена ошибка! {err}'
         if 0 in self._esr:

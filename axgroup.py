@@ -1,0 +1,50 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Nov 12 10:19:07 2025
+
+@author: user
+"""
+from PySide6.QtCore import QRect
+from PySide6.QtWidgets import QGroupBox, QSpinBox, QComboBox, QLabel
+
+class AxesGroupBox(QGroupBox):
+    def __init__(self, parent = None):
+       super().__init__(parent)
+       
+       self.sp_ymin = QSpinBox(self)
+       self.sp_ymin.setGeometry(QRect(160, 30, 151, 22))
+       self.sp_ymin.setMinimum(-140)
+       self.sp_ymin.setMaximum(100)
+       self.sp_ymin.setPrefix('Ymin ')
+       self.sp_ymin.setSuffix(' дБ')
+       self.sp_ymax = QSpinBox(self)
+       self.sp_ymax.setGeometry(QRect(160, 6, 151, 22))
+       self.sp_ymax.setMinimum(-100)
+       self.sp_ymax.setMaximum(140)
+       self.sp_ymax.setPrefix('Ymax ')
+       self.sp_ymax.setSuffix(' дБ')
+       self.l_xmax = QLabel(self)
+       self.l_xmax.setGeometry(QRect(10, 6, 40, 22))
+       self.l_xmax.setText('Xmax ')
+       self.cmb_xmax = QComboBox(self)
+       self.cmb_xmax.setGeometry(QRect(50, 6, 100, 22))
+       self.cmb_xmax.addItem('0.15')
+       self.cmb_xmax.addItem('30')
+       self.cmb_xmax.addItem('100')
+       self.cmb_xmax.addItem('500')
+       self.cmb_xmax.addItem('1000')
+       self.cmb_xmax.addItem('9000')
+       self.cmb_xmax.addItem('18000')
+       self.l_xmin = QLabel(self)
+       self.l_xmin.setGeometry(QRect(10, 30, 40, 22))
+       self.l_xmin.setText('Xmin ')
+       self.cmb_xmin = QComboBox(self)
+       self.cmb_xmin.setGeometry(QRect(50, 30, 100, 22))
+       self.cmb_xmin.addItem('0.009')
+       self.cmb_xmin.addItem('0.15')
+       self.cmb_xmin.addItem('2')
+       self.cmb_xmin.addItem('10')
+       self.cmb_xmin.addItem('30')
+       self.cmb_xmin.addItem('100')
+       self.cmb_xmin.addItem('500')
+       self.cmb_xmin.addItem('1000')
