@@ -10,7 +10,7 @@ from PySide6.QtWidgets import QGroupBox, QSpinBox, QComboBox, QLabel
 class AxesGroupBox(QGroupBox):
     def __init__(self, parent = None):
        super().__init__(parent)
-       
+
        self.sp_ymin = QSpinBox(self)
        self.sp_ymin.setGeometry(QRect(160, 30, 151, 22))
        self.sp_ymin.setMinimum(-140)
@@ -20,7 +20,7 @@ class AxesGroupBox(QGroupBox):
        self.sp_ymax = QSpinBox(self)
        self.sp_ymax.setGeometry(QRect(160, 6, 151, 22))
        self.sp_ymax.setMinimum(-100)
-       self.sp_ymax.setMaximum(140)
+       self.sp_ymax.setMaximum(180)
        self.sp_ymax.setPrefix('Ymax ')
        self.sp_ymax.setSuffix(' дБ')
        self.l_xmax = QLabel(self)
