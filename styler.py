@@ -1,16 +1,13 @@
 br1 = "rgb(255, 255, 255)"  # background
-br2 = "rgb(230, 230, 240)"  # control elements
-br21 = "rgb(163, 173, 198)"  # control elements accent
-br3 = "rgb(95, 138, 180)"  # highlight
-br4 = "rgb(63, 73, 98)"  # accent
+br11 = "rgb(0, 0, 0)" # text
+br2 = "rgb(240, 241, 245)"  # control elements
+br21 = "rgb(200, 200, 215)"  # control elements accent
+br3 = "rgb(105, 148, 190)"  # success
+br4 = "rgb(0, 60, 116)"  # accent
 br5 = "rgb(215, 0, 0)"  # alert
 font = "Times New Roman"
 
 st = (
-    "QMainWindow { background-color: "
-    + br1
-    + "; border: 1px solid grey; border-radius: 5px; }"
-
     "QDialog { background-color: "
     + br1
     + "; border: 1px solid grey; border-radius: 5px; }"
@@ -24,7 +21,7 @@ st = (
     + br2
     + "; border: 1px solid grey; border-radius: 5px; }"
     "QToolButton:hover { background-color: "
-    + br3
+    + br1
     + "; border: 1px solid grey; border-radius: 5px; }"
     "QToolButton:checked { background-color: "
     + br4
@@ -45,33 +42,13 @@ st = (
     "QLineEdit { color: black; background-color: "
     + br1
     + "; selection-background-color: "
-    + br3
+    + br21
     + "; selection-color: "
-    + br1
+    + br11
     + '; font-family:'
     + font
     + '; font-size: 14px;'
     "border: 1px solid grey; border-radius: 5px; padding-left: 4px; } "
-
-    "QTextBrowser { color: black; background-color: "
-    + br1
-    + "; selection-background-color: "
-    + br3
-    + "; selection-color: "
-    + br1
-    + '; font-family:'
-    + font
-    + '; font-size: 14px; border: 1px solid grey; border-radius: 5px; } '
-
-    "QTextEdit { color: black; background-color: "
-    + br1
-    + "; selection-background-color: "
-    + br3
-    + "; selection-color: "
-    + br1
-    + '; font-family:'
-    + font
-    + '; font-size: 14px; border: 1px solid grey; border-radius: 5px; } '
 
     "QComboBox { color: black; background-color: "
     + br1
@@ -93,9 +70,9 @@ st = (
     "QSpinBox { color: black; background-color: "
     + br1
     + "; selection-background-color: "
-    + br3
+    + br21
     + "; selection-color: "
-    + br1
+    + br11
     + '; font-family:'
     + font
     + '; font-size: 14px; border: 1px solid grey; border-radius: 5px; } '
@@ -115,9 +92,9 @@ st = (
     "QDoubleSpinBox {color: black; background-color: "
     + br1
     + "; selection-background-color: "
-    + br3
+    + br21
     + "; selection-color: "
-    + br1
+    + br11
     + '; font-family:'
     + font
     + '; font-size: 14px; border: 1px solid grey; border-radius: 5px; } '
@@ -139,10 +116,10 @@ st = (
     + '; font-size: 14px; } '
     "QCheckBox::indicator { background-color: "
     + br1
-    + "; border: 1px solid grey; border-radius: 4px; } "
+    + "; border: 1px solid grey; border-radius: 5px; } "
     "QCheckBox::indicator:checked { background-color: "
     + br4
-    + "; border: 1px solid grey; border-radius: 4px; } "
+    + "; border: 1px solid grey; border-radius: 5px; } "
 
     'QTabWidget { color: black; font-family:'
     + font
@@ -153,8 +130,8 @@ st = (
 
     "QProgressBar { background-color: "
     + br2
-    + "; border: 0px solid grey; border-radius: 4px; } "
-    "QProgressBar::chunk { background-color: " + br3 + "; border-radius: 4px; } "
+    + "; border: 0px solid grey; border-radius: 5px; } "
+    "QProgressBar::chunk { background-color: " + br3 + "; border-radius: 5px; } "
 
     "QHeaderView { color: black; background-color: "
     + br1
@@ -166,7 +143,7 @@ st = (
     + font
     + '; font-size: 14px; color: black; selection-color: black; background-color: white;'
     'alternate-background-color: white; selection-background-color: '
-    + br2
+    + br21
     + "; border: 1px solid grey; border-radius: 5px; } "
     "MyTableWidget QTableCornerButton::section { background-color: " + br1 + "; } "
     "MyTableWidget::indicator { background-color: "
