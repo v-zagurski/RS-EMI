@@ -1,5 +1,6 @@
 import sys
 import os
+import tempfile
 import datetime
 import locale
 import warnings
@@ -21,6 +22,15 @@ from RsSpectrumAnalyzer import RsSpectrumAnalyzer
 
 warnings.filterwarnings("ignore")
 basedir = os.getcwd()
+
+if "NUITKA_ONEFILE_PARENT" in os.environ:
+   splash_filename = os.path.join(
+      tempfile.gettempdir(),
+      "onefile_%d_splash_feedback.tmp" % int(os.environ["NUITKA_ONEFILE_PARENT"]),
+   )
+
+   if os.path.exists(splash_filename):
+      os.unlink(splash_filename)
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 match os.name == 'nt':
@@ -123,7 +133,6 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
         if self.ch_1.isChecked(): check_list.append(1)
         if self.ch_2.isChecked(): check_list.append(2)
         if self.ch_3.isChecked(): check_list.append(3)
-        print(check_list)
         for i, row in data_set.iterrows():
             for j in range(self.tbl_scan.columnCount()):
                 data_set.iloc[i, j] = self.tbl_scan.item(i, j).text()
@@ -513,7 +522,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
         line2, = self.sc.axes.plot(v_freq, v_val2+v_cal+v_cor+self.sp_att.value(),
                             linewidth = 1.5, alpha = 0.85, color = (0.49, 0.18, 0.56))
         line4, = self.sc.axes.plot(self.v_fnorm, self.v_vnorm, linewidth = 2.5,
-                                    color = '#5580aa')
+                                    color = (0.41, 0.58, 0.74))
         self.sc.axes.set(xscale = 'log')
         self.sc.axes.set_ylabel(self.ylb, fontname = fnt, fontsize = 18)
         self.sc.axes.set_xlabel('Частота, МГц', fontname = fnt, fontsize = 18)
@@ -548,7 +557,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
             san.close()
             self.corethread.terminate()
 
-# sys.excepthook = show_error
+sys.excepthook = show_error
 
 if not QtWidgets.QApplication.instance():
     app = QtWidgets.QApplication(sys.argv)

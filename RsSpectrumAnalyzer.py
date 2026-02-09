@@ -84,7 +84,7 @@ class RsSpectrumAnalyzer:
             self.core.write(f'SWE:TIME {str(t)}')
         if gain is not None:
             if gain in (0, 1):
-                self.core.write(f'INP:GAIN {str(gain)}')
+                self.core.write(f'INP:GAIN:STAT {str(gain)}')
         if att is not None:
             self.core.write(f'INP:ATT {str(att)}')
         self._f_ax = (f1, st, f2)
@@ -97,7 +97,6 @@ class RsSpectrumAnalyzer:
         self._check_registers()
 
     def stop(self):
-        self.core.write('ABOR')
         self.core.query('*ESR?')
         self._called = True
         self._status = 'Готов к работе.'
