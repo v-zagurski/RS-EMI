@@ -21,7 +21,7 @@ class RsSpectrumAnalyzer:
     def __init__(self, res_string: str):
         self._str = res_string
         self.core = im.open_inst(self._str)
-        self.core.timeout = 2000
+        self.core.timeout = 3000
         self.core.write_termination, self.core.read_termination = '\n', '\n'
         self.core.query('*ESE?')
         self.core.write('*ESE 61')
@@ -31,6 +31,7 @@ class RsSpectrumAnalyzer:
         self.core.write('FORM REAL')
         self.core.write('INIT:CONT 0')
         self.core.write('DISP:TRAC:Y:SPAC LOG')
+        self.core.write('DISP:TRAC:STYL POLY')
         self._called = False
         self._status = 'Готов к работе.'
         self._idn = self.core.query('*IDN?')
@@ -63,13 +64,16 @@ class RsSpectrumAnalyzer:
             self.core.write(f'DET {det}')
         if fstart is not None:
             self.core.write(f'SCAN:START {str(fstart)} MHz')
+        f1 = float(self.core.query('SCAN:START?'))
         if fstop is not None:
             self.core.write(f'SCAN:STOP {str(fstop)} MHz')
+        f2 = float(self.core.query('SCAN:STOP?'))
         if step is not None and points is None:
             self.core.write(f'SCAN:STEP {str(step)} kHz')
         if points is not None and fstart is not None:
             step = (fstop-fstart)*1e3/points
             self.core.write(f'SCAN:STEP {str(step)} kHz')
+        st = float(self.core.query('SCAN:STEP?'))
         if rbw is not None:
             match cispr:
                 case False:
@@ -83,9 +87,6 @@ class RsSpectrumAnalyzer:
                 self.core.write(f'INP:GAIN {str(gain)}')
         if att is not None:
             self.core.write(f'INP:ATT {str(att)}')
-        f1 = float(self.core.query('SCAN:START?'))
-        f2 = float(self.core.query('SCAN:STOP?'))
-        st = float(self.core.query('SCAN:STEP?'))
         self._f_ax = (f1, st, f2)
         self._check_registers()
 
@@ -110,17 +111,12 @@ class RsSpectrumAnalyzer:
         except: return None, None, self._called
 
     def save_data(self, filename: str):
-        if 'Ceyear' in self._idn:
-            self.core.write(f'MMEM:STOR:TRAC:DATA TRACE1,"D:\{filename}.csv"')
-        else:
-            self.core.write('MMEM:STOR:TRAC:DATA TRACE1,' + filename + '.csv')
+        self.core.write(f"MMEM:STOR:STAT 1,'\Public\Datasets\{filename}.set'")
         self._check_registers()
 
     def save_screen(self, filename: str):
-        if 'Ceyear' in self._idn:
-            self.core.write(f'MMEM:STOR:SCR D:\{filename}.bmp')
-        else:
-            self.core.write('MMEM:STOR:SCR ' + filename + '.bmp')
+        self.core.write(f"MMEM:NAME '\Public\Screen Shots\{filename}.png'")
+        self.core.write('HCOP')
         self._check_registers()
 
     def _check_registers(self):

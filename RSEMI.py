@@ -123,11 +123,11 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
         if self.ch_1.isChecked(): check_list.append(1)
         if self.ch_2.isChecked(): check_list.append(2)
         if self.ch_3.isChecked(): check_list.append(3)
-
+        print(check_list)
         for i, row in data_set.iterrows():
             for j in range(self.tbl_scan.columnCount()):
                 data_set.iloc[i, j] = self.tbl_scan.item(i, j).text()
-
+        # print(data_set)
         det = data_set.values[check_list[nc], 5]
         fstart = float(data_set.values[check_list[nc], 0])
         fstop = float(data_set.values[check_list[nc], 1])
@@ -141,7 +141,7 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
         att = int(data_set.values[check_list[nc], 7])
         if san is not None:
             san.setup_meas(det=det, cispr=True, fstart=fstart, fstop=fstop,
-                            rbw=rbw,points=n, t=t,
+                            rbw=rbw, points=n, t=t,
                             att=att, gain=pre)
         v_freq = []
         for i in range(len(check_list)):
@@ -149,8 +149,6 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
                                 np.linspace(float(data_set.values[check_list[i], 0]),
                                             float(data_set.values[check_list[i], 1]),
                                             int(data_set.values[check_list[i], 2])+1))
-        print(len(v_freq))
-        print(v_freq)
         v_val1 = np.full(shape = len(v_freq), fill_value = np.nan)
         v_val2 = np.full(shape = len(v_freq), fill_value = np.nan)
         v_val3 = np.full(shape = len(v_freq), fill_value = np.nan)
@@ -228,7 +226,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
         self.b_xls.clicked.connect(self.savexls)
         self.b_jpg.clicked.connect(self.savejpg)
         self.b_xls_l.clicked.connect(self.loadxls)
-        self.b_csv_l.clicked.connect(self.loadcsv)
+        # self.b_csv_l.clicked.connect(self.loadcsv)
 
     def visaconnect(self):
         global san
@@ -373,7 +371,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
             self.add_work()
 
     def add_work(self):
-        global nc, data_set, fstart, fstop, n, rbw, t, det, pre, att
+        global nc, fstart, fstop, n, rbw, t, det, pre, att
         nc = nc+1
         try:
             det = data_set.values[check_list[nc], 5]
@@ -389,7 +387,10 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
             att = int(data_set.values[check_list[nc], 7])
             if san is not None:
                 san.setup_meas(det=det, cispr=True, fstart=fstart, fstop=fstop,
-                                rbw=rbw,points=n, t=t,
+                                rbw=rbw, points=n, t=t,
+                                att=att, gain=pre)
+                san.setup_meas(det=det, cispr=True, fstart=fstart, fstop=fstop,
+                                rbw=rbw, points=n, t=t,
                                 att=att, gain=pre)
             self.start_corethread()
         except:
@@ -408,7 +409,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
             att = int(data_set.values[check_list[nc], 7])
             if san is not None:
                 san.setup_meas(det=det, cispr=True, fstart=fstart, fstop=fstop,
-                                rbw=rbw,points=n, t=t,
+                                rbw=rbw, points=n, t=t,
                                 att=att, gain=pre)
 
     def finish_work(self):
@@ -459,7 +460,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     datf = pd.DataFrame({'freq, MHz': v_freq, 'val1, unit': v_val1,
                                             'val2, unit': v_val2, 'val3, unit': v_val3,
                                             'unit': 'dBuA'})
-            datf.to_excel(fname, index = None)
+            datf.to_excel(fname, index = False)
 
     def savejpg(self):
         fname, _ = QtWidgets.QFileDialog.getSaveFileName(
@@ -494,39 +495,6 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     self.ylb = 'Сила тока ИРП, дБмкА'
             self.plotdata()
 
-    def loadcsv(self):
-        global v_freq, v_val1, v_val2, v_val3, v_cal, v_cor
-        fname, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, 'Выберите файл .csv', basedir + '/Результаты сканирования',
-            filter = 'Comma separated (*.csv)')
-        if fname:
-            datf = pd.read_csv(fname, skiprows = 3,
-                                encoding='latin_1', index_col = False, header = None)
-            try:
-                idr = datf[(datf.values[:, 1] == -780) | (datf.iloc[:, 0].str.contains('[a-dA-D]'))
-                    | (datf.iloc[:, 0].str.contains('[f-zF-Z]'))].index
-                datf.drop(idr, inplace = True)
-                datf.dropna(inplace = True)
-            except:
-                pass
-            v_freq = np.array(datf.values[:, 0], dtype = float)/1e6
-            v_cal = interext(v_freq, self.fk, self.k)
-            v_cor = interext(v_freq, self.fl, self.l)
-            if len(v_val1) != len(v_freq):
-                v_val1 = np.full(shape = len(v_freq), fill_value = np.nan)
-            if len(v_val2) != len(v_freq):
-                v_val2 = np.full(shape = len(v_freq), fill_value = np.nan)
-            if len(v_val3) != len(v_freq):
-                v_val3 = np.full(shape = len(v_freq), fill_value = np.nan)
-            match self.cmb_trac.currentIndex():
-                case 0:
-                    v_val1 = np.array(datf.values[:, 1], dtype = float)+10*np.log10(50)+90
-                case 1:
-                    v_val2 = np.array(datf.values[:, 1], dtype = float)+10*np.log10(50)+90
-                case 2:
-                    v_val3 = np.array(datf.values[:, 1], dtype = float)+10*np.log10(50)+90
-            self.plotdata()
-
     def setx(self):
         if float(self.gr_ax.cmb_xmin.currentText()) < float(self.gr_ax.cmb_xmax.currentText()):
             self.plotdata()
@@ -538,11 +506,11 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
     def plotdata(self):
         self.sc.axes.cla()
         self.sc.axes.ticklabel_format(useLocale = True)
-        line2, = self.sc.axes.plot(v_freq, v_val2+v_cal+v_cor+self.sp_att.value(),
+        line3, = self.sc.axes.plot(v_freq, v_val3+v_cal+v_cor+self.sp_att.value(),
                             linewidth = 1.5, alpha = 0.85, color = (0.46, 0.67, 0.19))
         line1, = self.sc.axes.plot(v_freq, v_val1+v_cal+v_cor+self.sp_att.value(),
                             linewidth = 1.5, alpha = 0.85, color = (0.85, 0.32, 0.1))
-        line3, = self.sc.axes.plot(v_freq, v_val3+v_cal+v_cor+self.sp_att.value(),
+        line2, = self.sc.axes.plot(v_freq, v_val2+v_cal+v_cor+self.sp_att.value(),
                             linewidth = 1.5, alpha = 0.85, color = (0.49, 0.18, 0.56))
         line4, = self.sc.axes.plot(self.v_fnorm, self.v_vnorm, linewidth = 2.5,
                                     color = '#5580aa')
@@ -567,9 +535,9 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
         if np.any(~np.isnan(v_val1)):
             line1.set_label('Уровень ИРП')
         if np.any(~np.isnan(v_val2)):
-            line2.set_label('Уровень фона')
+            line2.set_label('Уровень ИРП 2')
         if np.any(~np.isnan(v_val3)):
-            line3.set_label('Уровень ИРП 2')
+            line3.set_label('Уровень фона')
         if np.any(~np.isnan(self.v_vnorm)):
             line4.set_label('Норма по ГОСТ')
         self.sc.axes.legend(prop = {'family': 'serif', 'size': 14})
