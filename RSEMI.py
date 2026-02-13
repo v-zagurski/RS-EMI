@@ -445,10 +445,14 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
             success(self.f_qye, False)
 
     def clearval(self):
-        global v_val1, v_val2, v_val3
+        global v_val1, v_val2, v_val3, v_cal, v_cor
         v_val1 = np.full(shape = len(v_freq), fill_value = np.nan)
         v_val2 = np.full(shape = len(v_freq), fill_value = np.nan)
         v_val3 = np.full(shape = len(v_freq), fill_value = np.nan)
+        v_cor = np.full(shape = len(v_freq), fill_value = 0)
+        v_cal = np.full(shape = len(v_freq), fill_value = 0)
+        self.f_corr.setText('')
+        self.f_calib.setText('')
         self.plotdata()
 
     def savexls(self):
