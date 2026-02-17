@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Oct  9 09:43:53 2025
-
-@author: user
-"""
-
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QTableWidget, QLineEdit, QItemDelegate, QAbstractItemView
 
@@ -15,7 +8,7 @@ class MyTableWidget(QTableWidget):
        self.setEditTriggers(QAbstractItemView.EditTrigger.DoubleClicked)
        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
        # self.setItemDelegate(FloatDelegate(3))
-    
+
     def editcell(self, row, col):
         try:
             flags  = self.item(row, col).flags()
@@ -32,7 +25,7 @@ class MyTableWidget(QTableWidget):
         newtext = self.ql.text()
         self.item(row, col).setText(newtext)
         self.removeCellWidget(row, col)
-        
+
 class FloatDelegate(QItemDelegate):
     def __init__(self, decimals, parent=None):
         QItemDelegate.__init__(self, parent=parent)

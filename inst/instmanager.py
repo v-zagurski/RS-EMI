@@ -1,18 +1,11 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Oct 13 15:02:35 2025
-
-@author: user
-"""
-
 import threading
-import pyvisa, pyvisa_py
+import pyvisa
 
 class InstrumentManager:
     def __init__(self):
         self._lock = threading.RLock()
-        self._instruments = {}
-        self._res_manager = None
+        self._instruments: dict = {}
+        self._res_manager: pyvisa.ResourceManager | None = None
 
     def get_res_manager(self):
         with self._lock:
@@ -48,10 +41,5 @@ class InstrumentManager:
     def close_all(self):
         with self._lock:
             for instrument in self._instruments.values():
-                try:
-                    instrument.close()
-                except:
-                    pass
+                instrument.close()
             self._instruments.clear()
-
-# manager = InstrumentManager()

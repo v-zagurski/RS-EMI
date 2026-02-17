@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Nov 12 10:19:07 2025
-
-@author: user
-"""
 from PySide6.QtCore import QRect
 from PySide6.QtWidgets import QGroupBox, QSpinBox, QComboBox, QLabel
 

@@ -6,19 +6,21 @@ import locale
 import warnings
 import pandas as pd
 import numpy as np
-from scipy.interpolate import interp1d
 
-import matplotlib; matplotlib.use('QtAgg')
+import matplotlib
+matplotlib.use('QtAgg')
 import matplotlib.ticker as ticker
 from PySide6 import QtWidgets, QtGui, QtCore
 from PySide6.QtCore import Qt
-from emiwindow import Ui_EmiWindow
-from scanwindow import Ui_Settings
-from axgroup import AxesGroupBox
-from canvas import MplCanvas, NavigationToolbar2QT
-from styler import styler, alert, success
+from gui.emiwindow import Ui_EmiWindow
+from gui.scanwindow import Ui_Settings
+from gui.axgroup import AxesGroupBox
+from gui.canvas import MplCanvas, NavigationToolbar2QT
+from func.styler import styler, alert, success
+from func.errlogger import errlogger
+from func.interext import interext
 
-from RsSpectrumAnalyzer import RsSpectrumAnalyzer
+from inst.RsSpectrumAnalyzer import RsSpectrumAnalyzer
 
 warnings.filterwarnings("ignore")
 basedir = os.getcwd()
@@ -41,35 +43,42 @@ match os.name == 'nt':
 matplotlib.rcParams['font.serif'] = [fnt]
 np.set_printoptions(precision = 4)
 
-check_list = [0]; nc = 0
-data_set = pd.DataFrame(data=np.full(shape=(1, 8), fill_value=''))
-data_cal = None; data_cor = None; data_norm = None
-fname_set = None; fname_cal = None
-fname_cor = None; fname_norm = None
-fstart = None; fstop = None; n = None
-rbw = None; t = None; det = None
-pre = None; att = None
-v_freq = [0.009, 0.02, 0.05, 0.15]
-v_val1 = np.full(shape = len(v_freq), fill_value = np.nan)
-v_val2 = np.full(shape = len(v_freq), fill_value = np.nan)
-v_val3 = np.full(shape = len(v_freq), fill_value = np.nan)
-v_cal = np.full(shape = len(v_freq), fill_value = 0)
-v_cor = np.full(shape = len(v_freq), fill_value = 0)
+check_list: list[int] = [0]
+nc: int = 0
+data_set: pd.DataFrame = pd.DataFrame(data=np.full(shape=(1, 8), fill_value = None))
+data_cal: pd.DataFrame | None = None
+data_cor: pd.DataFrame | None = None
+data_norm: pd.DataFrame | None = None
+fname_set: str | None = None
+fname_cal: str | None = None
+fname_cor: str | None = None
+fname_norm: str | None = None
+det: str | None = None
+fstart: float | None = None
+fstop: float | None = None
+n: int | None = None
+rbw: float| None = None
+t: float | None = None
+pre: int | None = None
+att: int | None = None
+v_freq: np.ndarray  = np.array([0.009, 0.02, 0.05, 0.15])
+v_val1: np.ndarray = np.full(shape = len(v_freq), fill_value = np.nan)
+v_val2: np.ndarray = np.full(shape = len(v_freq), fill_value = np.nan)
+v_val3: np.ndarray = np.full(shape = len(v_freq), fill_value = np.nan)
+v_cal: np.ndarray = np.full(shape = len(v_freq), fill_value = 0)
+v_cor: np.ndarray = np.full(shape = len(v_freq), fill_value = 0)
 
-san = None
+san: RsSpectrumAnalyzer | None = None
 
 def show_error(in1, in2, in3):
     msg_box = QtWidgets.QMessageBox()
     msg_box.setWindowIcon(QtGui.QIcon(basedir + '/res/init.ico'))
     msg_box.setIcon(QtWidgets.QMessageBox.Icon.Critical)
-    msg_box.setWindowTitle(f"{in1}")
-    msg_box.setText(f"Ошибка! {in2}")
+    msg_box.setWindowTitle('Внимание!')
+    msg_box.setText("Ошибка! \n Подробнее в 'errors.log'.")
+    errlogger(basedir, f'{in1}, {in2}')
     QtCore.QTimer.singleShot(3000, msg_box.close)
     msg_box.exec()
-
-def interext(in1, in2, in3):
-    inter = interp1d(in2, in3, kind = 'quadratic', fill_value = 'extrapolate')
-    return inter(in1)
 
 class CoreThread(QtCore.QThread):
     progress = QtCore.Signal(tuple)
@@ -102,16 +111,20 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
         self.setWindowTitle("RS-EMI")
         self.setWindowIcon(QtGui.QIcon(basedir + '/res/init.ico'))
 
-        for i, row in data_set.iterrows():
+        for i in range(len(data_set.index)):
             for j in range(self.tbl_scan.columnCount()):
-                self.tbl_scan.setItem(i, j, QtWidgets.QTableWidgetItem(str(data_set.values[i, j])))
+                self.tbl_scan.setItem(i, j, QtWidgets.QTableWidgetItem(data_set.iloc[i, j]))
         self.b_load.clicked.connect(self.loadsettings)
         self.b_apply.clicked.connect(self.applysettings)
         self.b_save.clicked.connect(self.savetonew)
-        if 0 in check_list: self.ch_0.setChecked(True)
-        if 1 in check_list: self.ch_1.setChecked(True)
-        if 2 in check_list: self.ch_2.setChecked(True)
-        if 3 in check_list: self.ch_3.setChecked(True)
+        if 0 in check_list:
+            self.ch_0.setChecked(True)
+        if 1 in check_list:
+            self.ch_1.setChecked(True)
+        if 2 in check_list:
+            self.ch_2.setChecked(True)
+        if 3 in check_list:
+            self.ch_3.setChecked(True)
 
     def loadsettings(self):
         global check_list, nc, fname_set, data_set
@@ -121,22 +134,28 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
             '/Настройки сканирования', filter = 'Excel files (*set.xlsx)')
         if fname_set:
             data_set = pd.read_excel(fname_set, index_col = None, header = None, dtype = str)
-            for i, row in data_set.iterrows():
+            for i in range(len(data_set.index)):
                 for j in range(self.tbl_scan.columnCount()):
-                    self.tbl_scan.setItem(i, j, QtWidgets.QTableWidgetItem(str(data_set.values[i, j])))
+                    self.tbl_scan.setItem(i, j, QtWidgets.QTableWidgetItem(data_set.iloc[i, j]))
 
     def applysettings(self):
         global check_list, nc, data_set, fstart, fstop, n, rbw, t, det, pre, att
         global v_freq, v_val1, v_val2, v_val3, v_cal, v_cor
-        check_list = []; nc = 0
-        if self.ch_0.isChecked(): check_list.append(0)
-        if self.ch_1.isChecked(): check_list.append(1)
-        if self.ch_2.isChecked(): check_list.append(2)
-        if self.ch_3.isChecked(): check_list.append(3)
-        for i, row in data_set.iterrows():
+        check_list = []
+        nc = 0
+        if self.ch_0.isChecked():
+            check_list.append(0)
+        if self.ch_1.isChecked():
+            check_list.append(1)
+        if self.ch_2.isChecked():
+            check_list.append(2)
+        if self.ch_3.isChecked():
+            check_list.append(3)
+
+        for i in range(len(data_set.index)):
             for j in range(self.tbl_scan.columnCount()):
                 data_set.iloc[i, j] = self.tbl_scan.item(i, j).text()
-        # print(data_set)
+
         det = data_set.values[check_list[nc], 5]
         fstart = float(data_set.values[check_list[nc], 0])
         fstop = float(data_set.values[check_list[nc], 1])
@@ -152,7 +171,7 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
             san.setup_meas(det=det, cispr=True, fstart=fstart, fstop=fstop,
                             rbw=rbw, points=n, t=t,
                             att=att, gain=pre)
-        v_freq = []
+        v_freq = np.array([])
         for i in range(len(check_list)):
             v_freq = np.append(v_freq,
                                 np.linspace(float(data_set.values[check_list[i], 0]),
@@ -171,7 +190,7 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
         fname_set, _ = QtWidgets.QFileDialog.getSaveFileName(
             self, 'Укажите имя файла', filter = 'Excel files (*.xlsx)')
         if fname_set:
-            for i, row in data_set.iterrows():
+            for i in range(len(data_set.index)):
                 for j in range(self.tbl_scan.columnCount()-1):
                     data_set.iloc[i, j] = self.tbl_scan.item(i, j).text()
             data_set.to_excel(fname_set, index = False, header = False)
@@ -194,12 +213,13 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                 for line in instfile:
                     st = line.strip()
             self.f_inst.setText(st)
-        except:
+        except Exception:
             self.f_inst.setText('TCPIP::')
 
         self.v_fnorm = [0.009, 0.15, 0.5, 6, 30, 100, 1000]
         self.v_vnorm = np.full(shape = len(self.v_fnorm), fill_value = np.nan)
-        self.fk = v_freq; self.fl = v_freq;
+        self.fk = v_freq.copy()
+        self.fl = v_freq.copy()
         self.l = np.full(shape = len(v_freq), fill_value = 0)
         self.k = np.full(shape = len(v_freq), fill_value = 0)
 
@@ -235,7 +255,6 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
         self.b_xls.clicked.connect(self.savexls)
         self.b_jpg.clicked.connect(self.savejpg)
         self.b_xls_l.clicked.connect(self.loadxls)
-        # self.b_csv_l.clicked.connect(self.loadcsv)
 
     def visaconnect(self):
         global san
@@ -250,14 +269,13 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     san.setup_meas(trac_mode='MAXH', cont=0, av_num=1)
                     self.f_stat.setText(san._status)
                     self.dispreg()
-                except:
+                except Exception:
                     self.setCursor(Qt.CursorShape.ArrowCursor)
                     alert(self.f_inst, True)
             case False:
-                try:
+                if san is not None:
                     san.close()
                     san = None
-                except: pass
                 alert(self.f_inst, False)
                 self.b_start.setChecked(False)
                 self.f_stat.setText(' ')
@@ -282,7 +300,8 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     case True:
                         self.f_settings.setText(os.path.basename(fname_set))
                     case False:
-                        self.f_settings.setText('Пользовательские настройки')
+                        self.f_settings.setText('Пользовательские')
+                self.f_settings.setCursorPosition(0)
             case 1:
                 global fname_cal, data_cal, v_cal
                 fname_cal, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Выберите файл cal.xlsx',
@@ -290,9 +309,11 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     filter = 'Excel files (*cal.xlsx)')
                 if fname_cal:
                     data_cal = pd.read_excel(fname_cal)
-                    self.fk = data_cal['f'].values[:]; self.k = data_cal['k'].values[:]
+                    self.fk = data_cal['f'].values[:]
+                    self.k = data_cal['k'].values[:]
                     v_cal = interext(v_freq, self.fk, self.k)
                     self.f_calib.setText(os.path.basename(fname_cal))
+                    self.f_calib.setCursorPosition(0)
                     self.ch_calib.setChecked(True)
             case 2:
                 global fname_cor, data_cor, v_cor
@@ -301,9 +322,11 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     filter = 'Excel files (*cor.xlsx)')
                 if fname_cor:
                     data_cor = pd.read_excel(fname_cor)
-                    self.fl = data_cor['f'].values[:]; self.l = data_cor['l'].values[:]
+                    self.fl = data_cor['f'].values[:]
+                    self.l = data_cor['l'].values[:]
                     v_cor = interext(v_freq, self.fl, self.l)
                     self.f_corr.setText(os.path.basename(fname_cor))
+                    self.f_corr.setCursorPosition(0)
                     self.ch_corr.setChecked(True)
             case 3:
                 global fname_norm, data_norm
@@ -312,8 +335,10 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     filter = 'Excel files (*nor.xlsx)')
                 if fname_norm:
                     data_norm = pd.read_excel(fname_norm)
-                    self.v_fnorm = data_norm['f'].values[:]; self.v_vnorm = data_norm['a'].values[:]
+                    self.v_fnorm = data_norm['f'].values[:]
+                    self.v_vnorm = data_norm['a'].values[:]
                     self.f_norm.setText(os.path.basename(fname_norm))
+                    self.f_norm.setCursorPosition(0)
                     self.ch_norm.setChecked(True)
         self.plotdata()
 
@@ -322,19 +347,25 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
         match inp:
             case 0:
                if self.ch_calib.isChecked():
-                   self.fk = data_cal['f'].values[:]; self.k = data_cal['k'].values[:]
-                   v_cal = interext(v_freq, self.fk, self.k)
+                   if data_cal is not None:
+                        self.fk = data_cal['f'].values[:]
+                        self.k = data_cal['k'].values[:]
+                        v_cal = interext(v_freq, self.fk, self.k)
                else:
                    v_cal = np.full(shape = len(v_freq), fill_value = 0)
             case 1:
                 if self.ch_corr.isChecked():
-                    self.fl = data_cor['f'].values[:]; self.l = data_cor['l'].values[:]
-                    v_cor = interext(v_freq, self.fl, self.l)
+                    if data_cor is not None:
+                        self.fl = data_cor['f'].values[:]
+                        self.l = data_cor['l'].values[:]
+                        v_cor = interext(v_freq, self.fl, self.l)
                 else:
                     v_cor = np.full(shape = len(v_freq), fill_value = 0)
             case 2:
                 if self.ch_norm.isChecked():
-                    self.v_fnorm = data_norm['f'].values[:]; self.v_vnorm = data_norm['a'].values[:]
+                    if data_norm is not None:
+                        self.v_fnorm = data_norm['f'].values[:]
+                        self.v_vnorm = data_norm['a'].values[:]
                 else:
                   self.v_vnorm = np.full(shape = len(self.v_fnorm), fill_value = np.nan)
         self.plotdata()
@@ -381,8 +412,8 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
 
     def add_work(self):
         global nc, fstart, fstop, n, rbw, t, det, pre, att
-        nc = nc+1
-        try:
+        nc += 1
+        if nc in check_list:
             det = data_set.values[check_list[nc], 5]
             fstart = float(data_set.values[check_list[nc], 0])
             fstop = float(data_set.values[check_list[nc], 1])
@@ -402,7 +433,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                                 rbw=rbw, points=n, t=t,
                                 att=att, gain=pre)
             self.start_corethread()
-        except:
+        else:
             self.finish_work()
             nc = 0
             det = data_set.values[check_list[nc], 5]
@@ -536,8 +567,8 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                                                 3000, 9000, 18000]))
         self.sc.axes.set_xticklabels(['0,009', '0,02', '0,05', '0,15', '0,5',
                                         '1', '2', '5', '10', '15', '30', '50', '100', '200', '500',
-                                        f'1∙10\N{SUPERSCRIPT THREE}', f'3∙10\N{SUPERSCRIPT THREE}',
-                                        f'9∙10\N{SUPERSCRIPT THREE}', f'18∙10\N{SUPERSCRIPT THREE}'])
+                                        '1∙10\N{SUPERSCRIPT THREE}', '3∙10\N{SUPERSCRIPT THREE}',
+                                        '9∙10\N{SUPERSCRIPT THREE}', '18∙10\N{SUPERSCRIPT THREE}'])
         self.sc.axes.tick_params(labelsize = 14, labelfontfamily = 'serif')
         self.sc.axes.tick_params(axis = 'x', which = 'minor', labelcolor = 'white')
         self.sc.axes.set_ylim([self.gr_ax.sp_ymin.value(), self.gr_ax.sp_ymax.value()])
@@ -548,7 +579,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
         if np.any(~np.isnan(v_val1)):
             line1.set_label('Уровень ИРП')
         if np.any(~np.isnan(v_val2)):
-            line2.set_label('Уровень ИРП 2')
+            line2.set_label('Уровень ИРП2')
         if np.any(~np.isnan(v_val3)):
             line3.set_label('Уровень фона')
         if np.any(~np.isnan(self.v_vnorm)):

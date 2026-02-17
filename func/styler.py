@@ -1,3 +1,5 @@
+from PySide6.QtWidgets import QApplication, QWidget
+
 br1 = "rgb(255, 255, 255)"  # background
 br11 = "rgb(0, 0, 0)" # text
 br2 = "rgb(240, 241, 245)"  # control elements
@@ -171,13 +173,13 @@ st = (
     + '; font-size: 14px; font-weight: bold; } '
 )
 
-def styler(inp):
-    inp.setStyleSheet(st)
+def styler(app: QApplication) -> None:
+    app.setStyleSheet(st)
 
-def alert(inp1, inp2):
-    match inp2:
+def alert(wid: QWidget, flag: bool) -> None:
+    match flag:
         case True:
-            inp1.setStyleSheet(
+            wid.setStyleSheet(
                 "background-color: "
                 + br5
                 + '; font-family:'
@@ -185,7 +187,7 @@ def alert(inp1, inp2):
                 + '; font-size: 14px; border: 1px solid grey; border-radius: 5px;'
             )
         case False:
-            inp1.setStyleSheet(
+            wid.setStyleSheet(
                 "background-color: "
                 + br1
                 + '; font-family:'
@@ -193,11 +195,10 @@ def alert(inp1, inp2):
                 + '; font-size: 14px; border: 1px solid grey; border-radius: 5px;'
             )
 
-
-def success(inp1, inp2):
-    match inp2:
+def success(wid: QWidget, flag: bool) -> None:
+    match flag:
         case True:
-            inp1.setStyleSheet(
+            wid.setStyleSheet(
                 "background-color: "
                 + br3
                 + '; font-family:'
@@ -205,7 +206,7 @@ def success(inp1, inp2):
                 + '; font-size: 14px; border: 1px solid grey; border-radius: 5px;'
             )
         case False:
-            inp1.setStyleSheet(
+            wid.setStyleSheet(
                 "background-color: "
                 + br1
                 + '; font-family:'

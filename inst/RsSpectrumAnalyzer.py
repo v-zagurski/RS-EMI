@@ -1,28 +1,24 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Oct 14 08:33:07 2025
-
-@author: user
-"""
-
+from pyvisa.resources import MessageBasedResource
 import numpy as np
-from instmanager import InstrumentManager
+from inst.instmanager import InstrumentManager
 im = InstrumentManager()
 
-def regviewer(value):
-    pos_array = []; pos=0
+def regviewer(value: float) -> list[int]:
+    pos_list = []
+    pos=0
     while int(value) >= (1<<pos):
       if int(value) & (1<<pos):
-        pos_array.append(pos)
+        pos_list.append(pos)
       pos=pos+1
-    return pos_array
+    return pos_list
 
 class RsSpectrumAnalyzer:
     def __init__(self, res_string: str):
-        self._str = res_string
-        self.core = im.open_inst(self._str)
-        self.core.timeout = 3000
-        self.core.write_termination, self.core.read_termination = '\n', '\n'
+        self._str: str = res_string
+        self.core: MessageBasedResource = im.open_inst(self._str)
+        self.core.timeout: int = 3000
+        self.core.write_termination: str = '\n'
+        self.core.read_termination: str = '\n'
         self.core.query('*ESE?')
         self.core.write('*ESE 61')
         self.core.write('STAT:QUES:POW:ENAB 4')
@@ -32,13 +28,14 @@ class RsSpectrumAnalyzer:
         self.core.write('INIT:CONT 0')
         self.core.write('DISP:TRAC:Y:SPAC LOG')
         self.core.write('DISP:TRAC:STYL POLY')
-        self._called = False
-        self._status = 'Готов к работе.'
-        self._idn = self.core.query('*IDN?')
-        self._f_ax = (None, None, None)
+        self._called: bool = False
+        self._status: str = 'Готов к работе.'
+        self._idn: str = self.core.query('*IDN?')
+        self._f_ax: tuple = (None, None, None)
         self._check_registers()
 
-    def setup_display(self, unit: str = None, ref: int = None, scale: int = None):
+    def setup_display(self, unit: str | None = None,
+                        ref: int | None = None, scale: int | None = None):
         if unit is not None:
             self.core.write('UNIT:POW ' + unit)
         if ref is not None:
@@ -47,12 +44,19 @@ class RsSpectrumAnalyzer:
             self.core.write(f'DISP:TRAC:Y:SCAL {str(scale)}')
         self._check_registers()
 
-    def setup_meas(self, trac_mode: str = None, cont: int = None,
-                          av_num: int = None,
-                          det: str = None, cispr: bool = False,
-                          fstart: float = None, fstop: float = None,
-                          step: float = None, points: int = None, rbw: float = None,
-                          t: float = None, att: int = None, gain: int = None):
+    def setup_meas(self, trac_mode: str | None = None,
+                        cont: int | None = None,
+                        av_num: int | None = None,
+                        det: str | None = None,
+                        cispr: bool | None = False,
+                        fstart: float | None = None,
+                        fstop: float | None = None,
+                        step: float | None = None,
+                        points: int | None = None,
+                        rbw: float | None = None,
+                        t: float | None = None,
+                        att: int | None = None,
+                        gain: int | None = None):
         if trac_mode is not None:
             self.core.write(f'DISP:TRAC:MODE {trac_mode}')
         if cont is not None:
@@ -104,10 +108,11 @@ class RsSpectrumAnalyzer:
     def get_data(self):
         try:
             freqs = np.arange(self._f_ax[0], self._f_ax[2]+self._f_ax[1], self._f_ax[1])
-            data = self.core.query_binary_values('TRAC1:DATA?', datatype='f', container=np.array)
+            data = self.core.query_binary_values('TRAC1:DATA?', datatype='f', container=np.ndarray)
             self._check_registers()
             return freqs, data, self._called
-        except: return None, None, self._called
+        except Exception:
+            return None, None, self._called
 
     def save_data(self, filename: str):
         self.core.write(f"MMEM:STOR:STAT 1,'\Public\Datasets\{filename}.set'")
