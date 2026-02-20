@@ -210,3 +210,4 @@ tester.py
 *.ui
 *.xlsx
 *.jpg
+!sample*
