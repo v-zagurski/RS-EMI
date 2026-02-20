@@ -108,7 +108,7 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
         self.setupUi(self)
         self.setWindowOpacity(0.98)
         self.setFixedSize(702, 260)
-        self.setWindowTitle("RS-EMI")
+        self.setWindowTitle("RS-EMI v1.0")
         self.setWindowIcon(QtGui.QIcon(basedir + '/res/init.ico'))
 
         for i in range(len(data_set.index)):
@@ -202,8 +202,8 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
         self.setupUi(self)
         self.setFixedSize(1240, 650)
         self.setWindowOpacity(0.98)
-        self.setWindowTitle("RS-EMI")
-        self.setWindowIcon(QtGui.QIcon(basedir + '/res/init.ico'))
+        self.setWindowTitle("RS-EMI v1.0")
+        # self.setWindowIcon(QtGui.QIcon(basedir + '/res/init.ico'))
 
         self.corethread = CoreThread()
         self.corethread.progress.connect(self.update_work)
