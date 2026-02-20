@@ -130,10 +130,10 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
         global check_list, nc, fname_set, data_set
         nc = 0
         fname_set, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, 'Выберите файл set.xlsx', basedir +
-            '/Настройки сканирования', filter = 'Excel files (*set.xlsx)')
+            self, 'Выберите файл set.tab', basedir +
+            '/Настройки сканирования', filter = 'Tab separated (*set.tab)')
         if fname_set:
-            data_set = pd.read_excel(fname_set, index_col = None, header = None, dtype = str)
+            data_set = pd.read_table(fname_set, index_col = None, header = None, dtype = str)
             for i in range(len(data_set.index)):
                 for j in range(self.tbl_scan.columnCount()):
                     self.tbl_scan.setItem(i, j, QtWidgets.QTableWidgetItem(data_set.iloc[i, j]))
@@ -188,12 +188,12 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
     def savetonew(self):
         global fname_set, data_set
         fname_set, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, 'Укажите имя файла', filter = 'Excel files (*.xlsx)')
+            self, 'Укажите имя файла', filter = 'Tab separated (*set.tab)')
         if fname_set:
             for i in range(len(data_set.index)):
                 for j in range(self.tbl_scan.columnCount()-1):
                     data_set.iloc[i, j] = self.tbl_scan.item(i, j).text()
-            data_set.to_excel(fname_set, index = False, header = False)
+            data_set.to_csv(fname_set, sep='\t', index = False, header = False)
 
 class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
     def __init__(self):
@@ -252,9 +252,9 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
         self.gr_ax.sp_ymin.valueChanged.connect(self.sety)
         self.gr_ax.sp_ymax.valueChanged.connect(self.sety)
         self.b_clear.clicked.connect(self.clearval)
-        self.b_xls.clicked.connect(self.savexls)
+        self.b_tab.clicked.connect(self.savetab)
         self.b_jpg.clicked.connect(self.savejpg)
-        self.b_xls_l.clicked.connect(self.loadxls)
+        self.b_tab_l.clicked.connect(self.loadtab)
 
     def visaconnect(self):
         global san
@@ -304,11 +304,11 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                 self.f_settings.setCursorPosition(0)
             case 1:
                 global fname_cal, data_cal, v_cal
-                fname_cal, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Выберите файл cal.xlsx',
+                fname_cal, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Выберите файл cal.tab',
                     basedir + '/Калибровочные коэф-ты',
-                    filter = 'Excel files (*cal.xlsx)')
+                    filter = 'Tab separated (*cal.tab)')
                 if fname_cal:
-                    data_cal = pd.read_excel(fname_cal)
+                    data_cal = pd.read_table(fname_cal, decimal=',')
                     self.fk = data_cal['f'].values[:]
                     self.k = data_cal['k'].values[:]
                     v_cal = interext(v_freq, self.fk, self.k)
@@ -317,11 +317,11 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     self.ch_calib.setChecked(True)
             case 2:
                 global fname_cor, data_cor, v_cor
-                fname_cor, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Выберите файл cor.xlsx',
+                fname_cor, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Выберите файл cor.tab',
                     basedir + '/Амплитудная коррекция',
-                    filter = 'Excel files (*cor.xlsx)')
+                    filter = 'Tab separated (*cor.tab)')
                 if fname_cor:
-                    data_cor = pd.read_excel(fname_cor)
+                    data_cor = pd.read_table(fname_cor, decimal=',')
                     self.fl = data_cor['f'].values[:]
                     self.l = data_cor['l'].values[:]
                     v_cor = interext(v_freq, self.fl, self.l)
@@ -330,11 +330,11 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     self.ch_corr.setChecked(True)
             case 3:
                 global fname_norm, data_norm
-                fname_norm, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Выберите файл nor.xlsx',
+                fname_norm, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Выберите файл nor.tab',
                     basedir + '/Нормы',
-                    filter = 'Excel files (*nor.xlsx)')
+                    filter = 'Tab separated (*nor.tab)')
                 if fname_norm:
-                    data_norm = pd.read_excel(fname_norm)
+                    data_norm = pd.read_table(fname_norm, decimal=',')
                     self.v_fnorm = data_norm['f'].values[:]
                     self.v_vnorm = data_norm['a'].values[:]
                     self.f_norm.setText(os.path.basename(fname_norm))
@@ -486,25 +486,25 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
         self.f_calib.setText('')
         self.plotdata()
 
-    def savexls(self):
+    def savetab(self):
         fname, _ = QtWidgets.QFileDialog.getSaveFileName(
             self, 'Укажите имя файла', basedir + '/Результаты сканирования',
-            filter = 'Excel files (*.xlsx)')
+            filter = 'Tab separated (*.tab)')
         if fname:
             match self.cmb_val.currentIndex():
                 case 0:
-                    datf = pd.DataFrame({'freq, MHz': v_freq, 'val1, unit': v_val1,
-                                            'val2, unit': v_val2, 'val3, unit': v_val3,
+                    datf = pd.DataFrame({'freq, MHz': v_freq, 'val1': v_val1,
+                                            'val2': v_val2, 'val3': v_val3,
                                             'unit': 'dBuV'})
                 case 1:
-                    datf = pd.DataFrame({'freq, MHz': v_freq, 'val1, unit': v_val1,
-                                            'val2, unit': v_val2, 'val3, unit': v_val3,
+                    datf = pd.DataFrame({'freq, MHz': v_freq, 'val1': v_val1,
+                                            'val2': v_val2, 'val3': v_val3,
                                             'unit': 'dBuV/m'})
                 case 2:
-                    datf = pd.DataFrame({'freq, MHz': v_freq, 'val1, unit': v_val1,
-                                            'val2, unit': v_val2, 'val3, unit': v_val3,
+                    datf = pd.DataFrame({'freq, MHz': v_freq, 'val1': v_val1,
+                                            'val2': v_val2, 'val3': v_val3,
                                             'unit': 'dBuA'})
-            datf.to_excel(fname, index = False)
+            datf.to_csv(fname, sep='\t', index=False, float_format='%.4f', decimal=',')
 
     def savejpg(self):
         fname, _ = QtWidgets.QFileDialog.getSaveFileName(
@@ -513,17 +513,17 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
         if fname:
             self.sc.print_jpg(fname)
 
-    def loadxls(self):
+    def loadtab(self):
         global v_freq, v_val1, v_val2, v_val3, v_cal, v_cor
         fname, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, 'Выберите файл .xlsx', basedir + '/Результаты сканирования',
-            filter = 'Excel files (*.xlsx)')
+            self, 'Выберите файл .tab', basedir + '/Результаты сканирования',
+            filter = 'Tab separated (*.tab)')
         if fname:
-            datf = pd.read_excel(fname)
+            datf = pd.read_table(fname, decimal=',')
             v_freq = datf['freq, MHz'].values[:]
-            v_val1 = datf['val1, unit'].values[:]
-            v_val2 = datf['val2, unit'].values[:]
-            v_val3 = datf['val3, unit'].values[:]
+            v_val1 = datf['val1'].values[:]
+            v_val2 = datf['val2'].values[:]
+            v_val3 = datf['val3'].values[:]
             unit = datf['unit'].values[0]
             v_cal = interext(v_freq, self.fk, self.k)
             v_cor = interext(v_freq, self.fl, self.l)
@@ -550,11 +550,11 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
     def plotdata(self):
         self.sc.axes.cla()
         self.sc.axes.ticklabel_format(useLocale = True)
-        line3, = self.sc.axes.plot(v_freq, v_val3+v_cal+v_cor+self.sp_att.value(),
+        line3, = self.sc.axes.plot(v_freq, v_val3+v_cal-v_cor+self.sp_att.value(),
                             linewidth = 1.5, alpha = 0.85, color = (0.46, 0.67, 0.19))
-        line1, = self.sc.axes.plot(v_freq, v_val1+v_cal+v_cor+self.sp_att.value(),
+        line1, = self.sc.axes.plot(v_freq, v_val1+v_cal-v_cor+self.sp_att.value(),
                             linewidth = 1.5, alpha = 0.85, color = (0.85, 0.32, 0.1))
-        line2, = self.sc.axes.plot(v_freq, v_val2+v_cal+v_cor+self.sp_att.value(),
+        line2, = self.sc.axes.plot(v_freq, v_val2+v_cal-v_cor+self.sp_att.value(),
                             linewidth = 1.5, alpha = 0.85, color = (0.49, 0.18, 0.56))
         line4, = self.sc.axes.plot(self.v_fnorm, self.v_vnorm, linewidth = 2.5,
                                     color = (0.41, 0.58, 0.74))
@@ -600,6 +600,9 @@ else:
     app = QtWidgets.QApplication.instance()
 
 styler(app)
+
+with open('errors.log', 'w') as f:
+    pass
 
 ew = EmiWindow()
 ew.show()

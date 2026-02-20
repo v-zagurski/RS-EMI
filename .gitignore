@@ -209,5 +209,6 @@ __marimo__/
 tester.py
 *.ui
 *.xlsx
+*.tab
 *.jpg
 !sample*
