@@ -1,1 +1,0 @@
-nuitka --windows-console-mode=disable --onefile --onefile-cache-mode=cached --onefile-tempdir-spec="{TEMP}/RSEMI" --remove-output --windows-icon-from-ico=res/init.ico --onefile-windows-splash-screen-image=res/init.png --output-filename=RS-EMI --product-name=RS-EMI --product-version=1.0 --enable-plugin=pyside6 --mingw64 --lto=yes "RSEMI.py"
