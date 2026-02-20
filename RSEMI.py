@@ -203,7 +203,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
         self.setFixedSize(1240, 650)
         self.setWindowOpacity(0.98)
         self.setWindowTitle("RS-EMI v1.0")
-        # self.setWindowIcon(QtGui.QIcon(basedir + '/res/init.ico'))
+        self.setWindowIcon(QtGui.QIcon(basedir + '/res/init.ico'))
 
         self.corethread = CoreThread()
         self.corethread.progress.connect(self.update_work)
