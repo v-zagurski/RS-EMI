@@ -1,6 +1,6 @@
 from pyvisa.resources import MessageBasedResource
 import numpy as np
-from inst.instmanager import InstrumentManager
+from _inst.instmanager import InstrumentManager
 im = InstrumentManager()
 
 def regviewer(value: float) -> list[int]:

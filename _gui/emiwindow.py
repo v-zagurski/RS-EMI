@@ -1,7 +1,7 @@
 from PySide6.QtCore import (QCoreApplication, QRect)
 from PySide6.QtWidgets import (QAbstractSpinBox, QComboBox, QCheckBox, QGroupBox,
     QLabel, QLineEdit, QProgressBar, QSpinBox)
-from gui.mybutton import MyPushButton
+from _gui.mybutton import MyPushButton
 
 class Ui_EmiWindow(object):
     def setupUi(self, EmiWindow):

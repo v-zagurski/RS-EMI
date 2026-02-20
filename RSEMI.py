@@ -12,15 +12,15 @@ matplotlib.use('QtAgg')
 import matplotlib.ticker as ticker
 from PySide6 import QtWidgets, QtGui, QtCore
 from PySide6.QtCore import Qt
-from gui.emiwindow import Ui_EmiWindow
-from gui.scanwindow import Ui_Settings
-from gui.axgroup import AxesGroupBox
-from gui.canvas import MplCanvas, NavigationToolbar2QT
-from func.styler import styler, alert, success
-from func.errlogger import errlogger
-from func.interext import interext
+from _gui.emiwindow import Ui_EmiWindow
+from _gui.scanwindow import Ui_Settings
+from _gui.axgroup import AxesGroupBox
+from _gui.canvas import MplCanvas, NavigationToolbar2QT
+from _func.styler import styler, alert, success
+from _func.errlogger import errlogger
+from _func.interext import interext
 
-from inst.RsSpectrumAnalyzer import RsSpectrumAnalyzer
+from _inst.RsSpectrumAnalyzer import RsSpectrumAnalyzer
 
 warnings.filterwarnings("ignore")
 basedir = os.getcwd()

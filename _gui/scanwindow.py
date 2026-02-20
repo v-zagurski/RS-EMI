@@ -1,8 +1,8 @@
 from PySide6.QtCore import (QCoreApplication, QRect)
 from PySide6.QtWidgets import (QCheckBox, QFrame, QGroupBox,
                                QTableWidgetItem)
-from gui.mytable import MyTableWidget
-from gui.mybutton import MyPushButton
+from _gui.mytable import MyTableWidget
+from _gui.mybutton import MyPushButton
 
 class Ui_Settings(object):
     def setupUi(self, Settings):
