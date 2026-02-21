@@ -502,10 +502,10 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     datf = pd.DataFrame({'freq, MHz': v_freq, 'val1': v_val1,
                                             'val2': v_val2, 'val3': v_val3,
                                             'unit': 'dBuA'})
-            if '.dat' in fname:
+            if '.tab' in fname:
                 datf.to_csv(fname, sep='\t', index=False, float_format='%.4f', decimal=',')
             else:
-                datf.to_csv(f'{fname}.dat', sep='\t', index=False, float_format='%.4f', decimal=',')
+                datf.to_csv(f'{fname}.tab', sep='\t', index=False, float_format='%.4f', decimal=',')
 
     def savejpg(self):
         fname, _ = QtWidgets.QFileDialog.getSaveFileName(
