@@ -66,10 +66,11 @@ class Ui_Settings(object):
         self.b_save.setCheckable(False)
 
         self.retranslateUi(Settings)
+    # setupUi
 
     def retranslateUi(self, Settings):
         Settings.setWindowTitle(QCoreApplication.translate("Settings", u"Dialog", None))
-        self.gr_set.setTitle(QCoreApplication.translate("Settings", u"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0441\u043a\u0430\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u044f", None))
+        self.gr_set.setTitle(QCoreApplication.translate("Settings", u"Sweep Settings", None))
         ___qtablewidgetitem = self.tbl_scan.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("Settings", u"Fstart", None));
         ___qtablewidgetitem1 = self.tbl_scan.horizontalHeaderItem(1)
@@ -90,6 +91,7 @@ class Ui_Settings(object):
         self.ch_1.setText("")
         self.ch_2.setText("")
         self.ch_3.setText("")
-        self.b_load.setText(QCoreApplication.translate("Settings", u"\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c", None))
-        self.b_apply.setText(QCoreApplication.translate("Settings", u"\u041f\u0440\u0438\u043c\u0435\u043d\u0438\u0442\u044c", None))
-        self.b_save.setText(QCoreApplication.translate("Settings", u"\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u0432 \u043d\u043e\u0432\u044b\u0439", None))
+        self.b_load.setText(QCoreApplication.translate("Settings", u"Load", None))
+        self.b_apply.setText(QCoreApplication.translate("Settings", u"Apply", None))
+        self.b_save.setText(QCoreApplication.translate("Settings", u"Save to New", None))
+    # retranslateUi

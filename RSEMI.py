@@ -2,7 +2,6 @@ import sys
 import os
 import tempfile
 import datetime
-import locale
 import warnings
 import pandas as pd
 import numpy as np
@@ -34,7 +33,6 @@ if "NUITKA_ONEFILE_PARENT" in os.environ:
    if os.path.exists(splash_filename):
       os.unlink(splash_filename)
 
-locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 match os.name == 'nt':
     case True:
         fnt = 'Times New Roman'
@@ -68,7 +66,7 @@ v_val2: np.ndarray = np.full(shape = len(v_freq), fill_value = np.nan)
 v_val3: np.ndarray = np.full(shape = len(v_freq), fill_value = np.nan)
 v_cal: np.ndarray = np.full(shape = len(v_freq), fill_value = 0)
 v_cor: np.ndarray = np.full(shape = len(v_freq), fill_value = 0)
-v_vnorm: np.ndarray = np.full(shape = len(v_fnorm), fill_value = np.nan)
+v_vnorm = np.full(shape = len(v_fnorm), fill_value = np.nan)
 
 san: RsSpectrumAnalyzer | None = None
 
@@ -76,8 +74,8 @@ def show_error(in1, in2, in3):
     msg_box = QtWidgets.QMessageBox()
     msg_box.setWindowIcon(QtGui.QIcon(basedir + '/util/init.ico'))
     msg_box.setIcon(QtWidgets.QMessageBox.Icon.Critical)
-    msg_box.setWindowTitle('Внимание!')
-    msg_box.setText("Ошибка! \n Подробнее в 'errors.log'.")
+    msg_box.setWindowTitle('Attention!')
+    msg_box.setText("An Error occured! \n See 'errors.log'.")
     errlogger(basedir, f'{in1}, {in2}')
     QtCore.QTimer.singleShot(3000, msg_box.close)
     msg_box.exec()
@@ -132,8 +130,8 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
         global check_list, nc, fname_set, data_set
         nc = 0
         fname_set, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, 'Выберите файл set.tab', basedir +
-            '/Настройки сканирования', filter = 'Tab separated (*set.tab)')
+            self, 'Select *set.tab', basedir +
+            '/Sweep Settings', filter = 'Tab separated (*set.tab)')
         if fname_set:
             data_set = pd.read_table(fname_set, index_col = None, header = None, dtype = str)
             for i in range(len(data_set.index)):
@@ -190,7 +188,7 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
     def savetonew(self):
         global fname_set, data_set
         fname_set, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, 'Укажите имя файла', filter = 'Tab separated (*set.tab)')
+            self, 'Enter File Name', filter = 'Tab separated (*set.tab)')
         if fname_set:
             for i in range(len(data_set.index)):
                 for j in range(self.tbl_scan.columnCount()-1):
@@ -222,7 +220,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
             self.f_inst.setText('TCPIP::')
 
         self.sc = MplCanvas(self, dpi = 100)
-        self.ylb = 'Напряжение ИРП, дБмкВ'
+        self.ylb = 'EMI Voltage, dBuV'
         self.tlb = NavigationToolbar2QT(self.sc)
         plotlayout = QtWidgets.QGridLayout()
         plotlayout.addWidget(self.tlb)
@@ -282,11 +280,11 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
     def setval(self):
         match self.cmb_val.currentIndex():
             case 0:
-                self.ylb = 'Напряжение ИРП, дБмкВ'
+                self.ylb = 'EMI Voltage, dBuV'
             case 1:
-                self.ylb = 'Напряженость поля ИРП, дБмкВ/м'
+                self.ylb = 'EMI Field Strength, dBuV/m'
             case 2:
-                self.ylb = 'Сила тока ИРП, дБмкА'
+                self.ylb = 'EMI Current, dBuA'
         self.plotdata()
 
     def setmeas(self, inp):
@@ -298,12 +296,12 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     case True:
                         self.f_settings.setText(os.path.basename(fname_set))
                     case False:
-                        self.f_settings.setText('Пользовательские')
+                        self.f_settings.setText('Custom')
                 self.f_settings.setCursorPosition(0)
             case 1:
                 global fname_cal, data_cal, v_cal
-                fname_cal, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Выберите файл cal.tab',
-                    basedir + '/Калибровочные коэф-ты',
+                fname_cal, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Select *cal.tab',
+                    basedir + '/Calibration Coefficients',
                     filter = 'Tab separated (*cal.tab)')
                 if fname_cal:
                     data_cal = pd.read_table(fname_cal, decimal=',')
@@ -314,9 +312,9 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     self.f_calib.setCursorPosition(0)
                     self.ch_calib.setChecked(True)
             case 2:
-                global fname_cor, data_cor, v_cor, v_fnorm, v_vnorm
-                fname_cor, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Выберите файл cor.tab',
-                    basedir + '/Амплитудная коррекция',
+                global fname_cor, data_cor, v_cor
+                fname_cor, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Select *cor.tab',
+                    basedir + '/Amplitude Correction',
                     filter = 'Tab separated (*cor.tab)')
                 if fname_cor:
                     data_cor = pd.read_table(fname_cor, decimal=',')
@@ -327,9 +325,9 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     self.f_corr.setCursorPosition(0)
                     self.ch_corr.setChecked(True)
             case 3:
-                global fname_norm, data_norm
-                fname_norm, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Выберите файл nor.tab',
-                    basedir + '/Нормы',
+                global fname_norm, data_norm, v_fnorm, v_vnorm
+                fname_norm, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Select *nor.tab',
+                    basedir + '/Limit Lines',
                     filter = 'Tab separated (*nor.tab)')
                 if fname_norm:
                     data_norm = pd.read_table(fname_norm, decimal=',')
@@ -488,7 +486,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
 
     def savetab(self):
         fname, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, 'Укажите имя файла', basedir + '/Результаты сканирования',
+            self, 'Enter File Name', basedir + '/Measurement Results',
             filter = 'Tab separated (*.tab)')
         if fname:
             match self.cmb_val.currentIndex():
@@ -508,7 +506,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
 
     def savejpg(self):
         fname, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, 'Укажите имя файла', basedir + '/Результаты сканирования/Изображения',
+            self, 'Enter File Name', basedir + '/Measurement Results/Images',
             filter = 'JPEG files (*.jpg)')
         if fname:
             self.sc.print_jpg(fname)
@@ -516,7 +514,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
     def loadtab(self):
         global v_freq, v_val1, v_val2, v_val3, v_cal, v_cor
         fname, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, 'Выберите файл .tab', basedir + '/Результаты сканирования',
+            self, 'Select *.tab', basedir + '/Measurement Results',
             filter = 'Tab separated (*.tab)')
         if fname:
             datf = pd.read_table(fname, decimal=',')
@@ -540,13 +538,13 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
             match unit:
                 case 'dBuV':
                     self.cmb_val.setCurrentIndex(0)
-                    self.ylb = 'Напряжение ИРП, дБмкВ'
+                    self.ylb = 'EMI Voltage, dBuV'
                 case 'dBuV/m':
                     self.cmb_val.setCurrentIndex(1)
-                    self.ylb = 'Напряженность поля ИРП, дБмкВ/м'
+                    self.ylb = 'EMI Field Strength, dBuV/m'
                 case 'dBuA':
                     self.cmb_val.setCurrentIndex(2)
-                    self.ylb = 'Сила тока ИРП, дБмкА'
+                    self.ylb = 'EMI Current, dBuA'
             self.plotdata()
 
     def setx(self):
@@ -559,7 +557,6 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
 
     def plotdata(self):
         self.sc.axes.cla()
-        self.sc.axes.ticklabel_format(useLocale = True)
         line3, = self.sc.axes.plot(v_freq, v_val3+v_cal-v_cor+self.sp_att.value(),
                             linewidth = 1.5, alpha = 0.85, color = (0.46, 0.67, 0.19))
         line1, = self.sc.axes.plot(v_freq, v_val1+v_cal-v_cor+self.sp_att.value(),
@@ -570,12 +567,12 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                                     color = (0.41, 0.58, 0.74))
         self.sc.axes.set(xscale = 'log')
         self.sc.axes.set_ylabel(self.ylb, fontname = fnt, fontsize = 18)
-        self.sc.axes.set_xlabel('Частота, МГц', fontname = fnt, fontsize = 18)
+        self.sc.axes.set_xlabel('Frequency, MHz', fontname = fnt, fontsize = 18)
         self.sc.axes.yaxis.set_major_locator(ticker.MultipleLocator(10))
         self.sc.axes.xaxis.set_ticks(np.array([0.009, 0.02, 0.05, 0.15, 0.5,
                                                 1, 2, 5, 10, 15, 30, 50, 100, 200, 500, 1000,
                                                 3000, 9000, 18000]))
-        self.sc.axes.set_xticklabels(['0,009', '0,02', '0,05', '0,15', '0,5',
+        self.sc.axes.set_xticklabels(['0.009', '0.02', '0.05', '0.15', '0.5',
                                         '1', '2', '5', '10', '15', '30', '50', '100', '200', '500',
                                         '1∙10\N{SUPERSCRIPT THREE}', '3∙10\N{SUPERSCRIPT THREE}',
                                         '9∙10\N{SUPERSCRIPT THREE}', '18∙10\N{SUPERSCRIPT THREE}'])
@@ -587,13 +584,13 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
         self.sc.axes.grid(True)
         self.sc.axes.format_coord = lambda x, y: "x = {:4.3F}\n y = {:3.2f}".format(x, y)
         if np.any(~np.isnan(v_val1)):
-            line1.set_label('Уровень ИРП')
+            line1.set_label('EMI Level 1')
         if np.any(~np.isnan(v_val2)):
-            line2.set_label('Уровень ИРП2')
+            line2.set_label('EMI Level 2')
         if np.any(~np.isnan(v_val3)):
-            line3.set_label('Уровень фона')
+            line3.set_label('Background Level')
         if np.any(~np.isnan(v_vnorm)):
-            line4.set_label('Норма по ГОСТ')
+            line4.set_label('Limit Line')
         self.sc.axes.legend(prop = {'family': 'serif', 'size': 14})
         self.sc.draw()
 
