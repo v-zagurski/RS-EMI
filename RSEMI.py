@@ -62,17 +62,19 @@ t: float | None = None
 pre: int | None = None
 att: int | None = None
 v_freq: np.ndarray  = np.array([0.009, 0.02, 0.05, 0.15])
+v_fnorm: np.ndarray = v_freq.copy()
 v_val1: np.ndarray = np.full(shape = len(v_freq), fill_value = np.nan)
 v_val2: np.ndarray = np.full(shape = len(v_freq), fill_value = np.nan)
 v_val3: np.ndarray = np.full(shape = len(v_freq), fill_value = np.nan)
 v_cal: np.ndarray = np.full(shape = len(v_freq), fill_value = 0)
 v_cor: np.ndarray = np.full(shape = len(v_freq), fill_value = 0)
+v_vnorm: np.ndarray = np.full(shape = len(v_fnorm), fill_value = np.nan)
 
 san: RsSpectrumAnalyzer | None = None
 
 def show_error(in1, in2, in3):
     msg_box = QtWidgets.QMessageBox()
-    msg_box.setWindowIcon(QtGui.QIcon(basedir + '/res/init.ico'))
+    msg_box.setWindowIcon(QtGui.QIcon(basedir + '/util/init.ico'))
     msg_box.setIcon(QtWidgets.QMessageBox.Icon.Critical)
     msg_box.setWindowTitle('Внимание!')
     msg_box.setText("Ошибка! \n Подробнее в 'errors.log'.")
@@ -109,7 +111,7 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
         self.setWindowOpacity(0.98)
         self.setFixedSize(702, 260)
         self.setWindowTitle("RS-EMI v1.0")
-        self.setWindowIcon(QtGui.QIcon(basedir + '/res/init.ico'))
+        self.setWindowIcon(QtGui.QIcon(basedir + '/util/init.ico'))
 
         for i in range(len(data_set.index)):
             for j in range(self.tbl_scan.columnCount()):
@@ -193,7 +195,10 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
             for i in range(len(data_set.index)):
                 for j in range(self.tbl_scan.columnCount()-1):
                     data_set.iloc[i, j] = self.tbl_scan.item(i, j).text()
-            data_set.to_csv(fname_set, sep='\t', index = False, header = False)
+            if '.set.tab' in fname_set:
+                data_set.to_csv(fname_set, sep='\t', index = False, header = False)
+            else:
+                data_set.to_csv(f'{fname_set}.set.tab', sep='\t', index = False, header = False)
 
 class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
     def __init__(self):
@@ -203,7 +208,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
         self.setFixedSize(1240, 650)
         self.setWindowOpacity(0.98)
         self.setWindowTitle("RS-EMI v1.0")
-        self.setWindowIcon(QtGui.QIcon(basedir + '/res/init.ico'))
+        self.setWindowIcon(QtGui.QIcon(basedir + '/util/init.ico'))
 
         self.corethread = CoreThread()
         self.corethread.progress.connect(self.update_work)
@@ -215,13 +220,6 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
             self.f_inst.setText(st)
         except Exception:
             self.f_inst.setText('TCPIP::')
-
-        self.v_fnorm = [0.009, 0.15, 0.5, 6, 30, 100, 1000]
-        self.v_vnorm = np.full(shape = len(self.v_fnorm), fill_value = np.nan)
-        self.fk = v_freq.copy()
-        self.fl = v_freq.copy()
-        self.l = np.full(shape = len(v_freq), fill_value = 0)
-        self.k = np.full(shape = len(v_freq), fill_value = 0)
 
         self.sc = MplCanvas(self, dpi = 100)
         self.ylb = 'Напряжение ИРП, дБмкВ'
@@ -309,22 +307,22 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     filter = 'Tab separated (*cal.tab)')
                 if fname_cal:
                     data_cal = pd.read_table(fname_cal, decimal=',')
-                    self.fk = data_cal['f'].values[:]
-                    self.k = data_cal['k'].values[:]
-                    v_cal = interext(v_freq, self.fk, self.k)
+                    v_fk = data_cal['f'].values[:]
+                    v_k = data_cal['k'].values[:]
+                    v_cal = interext(v_freq, v_fk, v_k)
                     self.f_calib.setText(os.path.basename(fname_cal))
                     self.f_calib.setCursorPosition(0)
                     self.ch_calib.setChecked(True)
             case 2:
-                global fname_cor, data_cor, v_cor
+                global fname_cor, data_cor, v_cor, v_fnorm, v_vnorm
                 fname_cor, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Выберите файл cor.tab',
                     basedir + '/Амплитудная коррекция',
                     filter = 'Tab separated (*cor.tab)')
                 if fname_cor:
                     data_cor = pd.read_table(fname_cor, decimal=',')
-                    self.fl = data_cor['f'].values[:]
-                    self.l = data_cor['l'].values[:]
-                    v_cor = interext(v_freq, self.fl, self.l)
+                    v_fl = data_cor['f'].values[:]
+                    v_l = data_cor['l'].values[:]
+                    v_cor = interext(v_freq, v_fl, v_l)
                     self.f_corr.setText(os.path.basename(fname_cor))
                     self.f_corr.setCursorPosition(0)
                     self.ch_corr.setChecked(True)
@@ -335,39 +333,39 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     filter = 'Tab separated (*nor.tab)')
                 if fname_norm:
                     data_norm = pd.read_table(fname_norm, decimal=',')
-                    self.v_fnorm = data_norm['f'].values[:]
-                    self.v_vnorm = data_norm['a'].values[:]
+                    v_fnorm = data_norm['f'].values[:]
+                    v_vnorm = data_norm['a'].values[:]
                     self.f_norm.setText(os.path.basename(fname_norm))
                     self.f_norm.setCursorPosition(0)
                     self.ch_norm.setChecked(True)
         self.plotdata()
 
     def setused(self, inp):
-        global v_cal, v_cor
+        global v_cal, v_cor, v_fnorm, v_vnorm
         match inp:
             case 0:
                if self.ch_calib.isChecked():
                    if data_cal is not None:
-                        self.fk = data_cal['f'].values[:]
-                        self.k = data_cal['k'].values[:]
-                        v_cal = interext(v_freq, self.fk, self.k)
+                        v_fk = data_cal['f'].values[:]
+                        v_k = data_cal['k'].values[:]
+                        v_cal = interext(v_freq, v_fk, v_k)
                else:
                    v_cal = np.full(shape = len(v_freq), fill_value = 0)
             case 1:
                 if self.ch_corr.isChecked():
                     if data_cor is not None:
-                        self.fl = data_cor['f'].values[:]
-                        self.l = data_cor['l'].values[:]
-                        v_cor = interext(v_freq, self.fl, self.l)
+                        v_fl = data_cor['f'].values[:]
+                        v_l = data_cor['l'].values[:]
+                        v_cor = interext(v_freq, v_fl, v_l)
                 else:
                     v_cor = np.full(shape = len(v_freq), fill_value = 0)
             case 2:
                 if self.ch_norm.isChecked():
                     if data_norm is not None:
-                        self.v_fnorm = data_norm['f'].values[:]
-                        self.v_vnorm = data_norm['a'].values[:]
+                        v_fnorm = data_norm['f'].values[:]
+                        v_vnorm = data_norm['a'].values[:]
                 else:
-                  self.v_vnorm = np.full(shape = len(self.v_fnorm), fill_value = np.nan)
+                  v_vnorm = np.full(shape = len(v_fnorm), fill_value = np.nan)
         self.plotdata()
 
     def setatt(self):
@@ -482,6 +480,8 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
         v_val3 = np.full(shape = len(v_freq), fill_value = np.nan)
         v_cor = np.full(shape = len(v_freq), fill_value = 0)
         v_cal = np.full(shape = len(v_freq), fill_value = 0)
+        self.ch_calib.setChecked(False)
+        self.ch_corr.setChecked(False)
         self.f_corr.setText('')
         self.f_calib.setText('')
         self.plotdata()
@@ -525,8 +525,18 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
             v_val2 = datf['val2'].values[:]
             v_val3 = datf['val3'].values[:]
             unit = datf['unit'].values[0]
-            v_cal = interext(v_freq, self.fk, self.k)
-            v_cor = interext(v_freq, self.fl, self.l)
+            if data_cal is not None:
+                v_fk = data_cal['f'].values[:]
+                v_k = data_cal['k'].values[:]
+                v_cal = interext(v_freq, v_fk, v_k)
+            else:
+                v_cal = np.full(shape = len(v_freq), fill_value = 0)
+            if data_cor is not None:
+                v_fl = data_cor['f'].values[:]
+                v_l = data_cor['l'].values[:]
+                v_cor = interext(v_freq, v_fl, v_l)
+            else:
+                v_cor = np.full(shape = len(v_freq), fill_value = 0)
             match unit:
                 case 'dBuV':
                     self.cmb_val.setCurrentIndex(0)
@@ -556,7 +566,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                             linewidth = 1.5, alpha = 0.85, color = (0.85, 0.32, 0.1))
         line2, = self.sc.axes.plot(v_freq, v_val2+v_cal-v_cor+self.sp_att.value(),
                             linewidth = 1.5, alpha = 0.85, color = (0.49, 0.18, 0.56))
-        line4, = self.sc.axes.plot(self.v_fnorm, self.v_vnorm, linewidth = 2.5,
+        line4, = self.sc.axes.plot(v_fnorm, v_vnorm, linewidth = 2.5,
                                     color = (0.41, 0.58, 0.74))
         self.sc.axes.set(xscale = 'log')
         self.sc.axes.set_ylabel(self.ylb, fontname = fnt, fontsize = 18)
@@ -582,7 +592,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
             line2.set_label('Уровень ИРП2')
         if np.any(~np.isnan(v_val3)):
             line3.set_label('Уровень фона')
-        if np.any(~np.isnan(self.v_vnorm)):
+        if np.any(~np.isnan(v_vnorm)):
             line4.set_label('Норма по ГОСТ')
         self.sc.axes.legend(prop = {'family': 'serif', 'size': 14})
         self.sc.draw()
