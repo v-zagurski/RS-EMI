@@ -3,7 +3,7 @@ nuitka \
 --onefile \
 --onefile-cache-mode=cached \
 --onefile-tempdir-spec="{TEMP}/RSEMI" \
---linux-icon=res/init.ico \
+--linux-icon=util/init.ico \
 --output-filename=RS-EMI \
 --product-name=RS-EMI \
 --product-version=1.0 \
