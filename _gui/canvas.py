@@ -6,7 +6,7 @@ class MplCanvas(FigureCanvasQTAgg):
     def __init__(self, parent = None, dpi = 300):
         fig = Figure(dpi = dpi)
         self.axes = fig.add_subplot(111)
-        fig.subplots_adjust(left = 0.1, bottom = 0.11, right = 0.96, top = 0.96)
+        fig.subplots_adjust(left = 0.1, bottom = 0.11, right = 0.95, top = 0.95)
         super().__init__(fig)
 
 class NavigationToolbar2QT(NT2QT):
