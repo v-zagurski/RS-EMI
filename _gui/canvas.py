@@ -1,6 +1,5 @@
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NT2QT
+from matplotlib.backends.backend_qtagg import (FigureCanvasQTAgg, NavigationToolbar2QT as NT2QT)
 
 class MplCanvas(FigureCanvasQTAgg):
     def __init__(self, parent = None, dpi = 300):
