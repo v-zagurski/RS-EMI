@@ -7,9 +7,7 @@ import warnings
 import pandas as pd
 import numpy as np
 
-import matplotlib
-matplotlib.use('QtAgg')
-import matplotlib.ticker as ticker
+import matplotlib as mpl
 from PySide6 import QtWidgets, QtGui, QtCore
 from PySide6.QtCore import Qt
 from _gui.emiwindow import Ui_EmiWindow
@@ -40,7 +38,8 @@ match os.name == 'nt':
         fnt = 'Times New Roman'
     case False:
         fnt = 'Liberation Serif'
-matplotlib.rcParams['font.serif'] = [fnt]
+mpl.rcParams['font.serif'] = [fnt]
+mpl.use('QtAgg')
 np.set_printoptions(precision = 4)
 
 check_list: list[int] = [0]
@@ -574,7 +573,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
         self.sc.axes.set(xscale = 'log')
         self.sc.axes.set_ylabel(self.ylb, fontname = fnt, fontsize = 18)
         self.sc.axes.set_xlabel('Частота, МГц', fontname = fnt, fontsize = 18)
-        self.sc.axes.yaxis.set_major_locator(ticker.MultipleLocator(10))
+        self.sc.axes.yaxis.set_major_locator(mpl.ticker.MultipleLocator(10))
         self.sc.axes.xaxis.set_ticks(np.array([0.009, 0.02, 0.05, 0.15, 0.5,
                                                 1, 2, 5, 10, 15, 30, 50, 100, 200, 500, 1000,
                                                 3000, 9000, 18000]))
