@@ -50,14 +50,7 @@ fname_set: str | None = None
 fname_cal: str | None = None
 fname_cor: str | None = None
 fname_norm: str | None = None
-det: str | None = None
 fstart: float | None = None
-fstop: float | None = None
-n: int | None = None
-rbw: float| None = None
-t: float | None = None
-pre: int | None = None
-att: int | None = None
 v_freq: np.ndarray  = np.array([0.009, 0.02, 0.05, 0.15])
 v_fnorm: np.ndarray = v_freq.copy()
 v_val1: np.ndarray = np.full(shape = len(v_freq), fill_value = np.nan)
@@ -138,7 +131,7 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
                     self.tbl_scan.setItem(i, j, QtWidgets.QTableWidgetItem(data_set.iloc[i, j]))
 
     def applysettings(self):
-        global check_list, nc, data_set, fstart, fstop, n, rbw, t, det, pre, att
+        global check_list, nc, data_set, fstart
         global v_freq, v_val1, v_val2, v_val3, v_cal, v_cor
         check_list = []
         nc = 0
@@ -406,7 +399,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
             self.add_work()
 
     def add_work(self):
-        global nc, fstart, fstop, n, rbw, t, det, pre, att
+        global nc, fstart
         nc += 1
         if nc in check_list:
             det = data_set.values[check_list[nc], 5]
