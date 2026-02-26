@@ -558,11 +558,11 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
         self.sc.axes.cla()
         self.sc.axes.ticklabel_format(useLocale = True)
         line3, = self.sc.axes.plot(v_freq, v_val3+v_cal-v_cor+self.sp_att.value(),
-                            linewidth = 1.5, alpha = 0.85, color = (0.46, 0.67, 0.19))
+                            linewidth = 1.2, alpha = 0.85, color = (0.46, 0.67, 0.19))
         line1, = self.sc.axes.plot(v_freq, v_val1+v_cal-v_cor+self.sp_att.value(),
-                            linewidth = 1.5, alpha = 0.85, color = (0.85, 0.32, 0.1))
+                            linewidth = 1.2, alpha = 0.85, color = (0.85, 0.32, 0.1))
         line2, = self.sc.axes.plot(v_freq, v_val2+v_cal-v_cor+self.sp_att.value(),
-                            linewidth = 1.5, alpha = 0.85, color = (0.49, 0.18, 0.56))
+                            linewidth = 1.2, alpha = 0.85, color = (0.49, 0.18, 0.56))
         line4, = self.sc.axes.plot(v_fnorm, v_vnorm, linewidth = 2.5,
                                     color = (0.41, 0.58, 0.74))
         self.sc.axes.set(xscale = 'log')
