@@ -3,9 +3,6 @@ The project is under development!
 Prerequisites: 
 - Developed with Python 3.12.10
 - Required modules may be installed via running 'pip install -r requirements.txt'
-- Data transfer is based on NI-VISA (https://www.ni.com/en/support/downloads/drivers/download.ni-visa.html?srsltid=AfmBOopSaK75bOdGAasXIDceWE_AjeTqfMXTUXJjXnet5QIUqjDX8moz#585834)
 - Tested with R&S Spectrum Rider FPH
-
-Currently working on complete pyvisa-py based workflow to avoid NI-VISA dependency.
 
 In 'ru' branch you may find a russian version of the application. Feel free to inspect!
