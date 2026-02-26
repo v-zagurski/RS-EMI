@@ -17,7 +17,7 @@ st = (
     "QToolBar { background-color: " + br1 + "; spacing: 4px }"
 
     "QToolButton { background-color: "
-    + br21
+    + br2
     + "; border: 1px solid grey; border-radius: 5px; }"
     "QToolButton:disabled { background-color: "
     + br2
