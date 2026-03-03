@@ -1,5 +1,6 @@
 import threading
 import pyvisa
+import pyvisa_py
 
 class InstrumentManager:
     def __init__(self):
