@@ -22,6 +22,8 @@ from _inst.RsSpectrumAnalyzer import RsSpectrumAnalyzer
 warnings.filterwarnings("ignore")
 basedir = os.getcwd()
 
+os.environ['QT_ENABLE_HIGHDPI_SCALING'] = '0'
+
 if "NUITKA_ONEFILE_PARENT" in os.environ:
    splash_filename = os.path.join(
       tempfile.gettempdir(),
