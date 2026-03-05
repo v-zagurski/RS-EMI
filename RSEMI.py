@@ -404,7 +404,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
     def add_work(self):
         global nc, n, fstart
         nc += 1
-        if nc in check_list:
+        if nc<=len(check_list)-1:
             det = data_set.values[check_list[nc], 5]
             fstart = float(data_set.values[check_list[nc], 0])
             fstop = float(data_set.values[check_list[nc], 1])
