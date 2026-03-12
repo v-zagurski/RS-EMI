@@ -29,7 +29,7 @@ class RsSpectrumAnalyzer:
         self.core.write('DISP:TRAC:Y:SPAC LOG')
         self.core.write('DISP:TRAC:STYL POLY')
         self._called: bool = False
-        self._status: str = 'Готов к работе.'
+        self._status: str = 'Ready'
         self._idn: str = self.core.query('*IDN?')
         self._f_ax: tuple = (None, None, None)
         self._check_registers()
@@ -96,14 +96,14 @@ class RsSpectrumAnalyzer:
 
     def initiate(self):
         self._called = False
-        self._status = 'Сканирование...'
+        self._status = 'Sweeping...'
         self.core.write('INIT:IMM; *OPC')
         self._check_registers()
 
     def stop(self):
         self.core.query('*ESR?')
         self._called = True
-        self._status = 'Готов к работе.'
+        self._status = 'Ready'
 
     def get_data(self) -> tuple:
         try:
@@ -127,21 +127,21 @@ class RsSpectrumAnalyzer:
         powval = float(self.core.query('STAT:QUES:POW?'))
         if powval != 0:
             self._called = True
-            self._status = 'Опасный уровень сигнала!'
+            self._status = 'Dangerous input level!'
 
         stbval = float(self.core.query('*STB?'))
         self._stb = regviewer(stbval)
         if 4 in self._stb:
-            self._status = 'Доступно сообщение!'
+            self._status = 'Message available!'
 
         esrval = float(self.core.query('*ESR?'))
         self._esr = regviewer(esrval)
         if any(value in [3, 4, 5] for value in self._esr):
             err = self.core.query('SYST:ERR?')
-            self._status = f'Обнаружена ошибка! {err}'
+            self._status = f'Error occured! {err}'
         if 0 in self._esr:
             self._called = True
-            self._status = 'Готов к работе.'
+            self._status = 'Ready'
 
     def close(self):
         im.close_inst(self._str)
