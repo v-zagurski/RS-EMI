@@ -1,6 +1,6 @@
-from pyvisa.resources import MessageBasedResource
 import numpy as np
 from _inst.instmanager import InstrumentManager
+from pyvisa.resources import MessageBasedResource
 im = InstrumentManager()
 
 def regviewer(value: float) -> list[int]:
@@ -39,9 +39,9 @@ class RsSpectrumAnalyzer:
         if unit is not None:
             self.core.write('UNIT:POW ' + unit)
         if ref is not None:
-            self.core.write(f'DISP:TRAC:Y:RLEV {str(ref)}')
+            self.core.write(f'DISP:TRAC:Y:RLEV {ref}')
         if scale is not None:
-            self.core.write(f'DISP:TRAC:Y:SCAL {str(scale)}')
+            self.core.write(f'DISP:TRAC:Y:SCAL {scale}')
         self._check_registers()
 
     def setup_meas(self, trac_mode: str | None = None,
@@ -61,36 +61,36 @@ class RsSpectrumAnalyzer:
             self.core.write(f'DISP:TRAC:MODE {trac_mode}')
         if cont is not None:
             if cont in (0, 1):
-                self.core.write(f'INIT:CONT {str(cont)}')
+                self.core.write(f'INIT:CONT {cont}')
         if av_num is not None:
-          self.core.write(f'SWE:COUN {str(av_num)}')
+          self.core.write(f'SWE:COUN {av_num}')
         if det is not None:
             self.core.write(f'DET {det}')
         if fstart is not None:
-            self.core.write(f'SCAN:START {str(fstart)} MHz')
+            self.core.write(f'SCAN:START {fstart} MHz')
         f1 = float(self.core.query('SCAN:START?'))
         if fstop is not None:
-            self.core.write(f'SCAN:STOP {str(fstop)} MHz')
+            self.core.write(f'SCAN:STOP {fstop} MHz')
         f2 = float(self.core.query('SCAN:STOP?'))
         if step is not None and points is None:
-            self.core.write(f'SCAN:STEP {str(step)} kHz')
+            self.core.write(f'SCAN:STEP {step} kHz')
         if points is not None and fstart is not None:
             step = (fstop-fstart)*1e3/points
-            self.core.write(f'SCAN:STEP {str(step)} kHz')
+            self.core.write(f'SCAN:STEP {step} kHz')
         st = float(self.core.query('SCAN:STEP?'))
         if rbw is not None:
             match cispr:
                 case False:
-                    self.core.write(f'BAND {str(rbw)} kHz')
+                    self.core.write(f'BAND {rbw} kHz')
                 case True:
-                    self.core.write(f'BAND:CISP {str(rbw)} kHz')
+                    self.core.write(f'BAND:CISP {rbw} kHz')
         if t is not None:
-            self.core.write(f'SWE:TIME {str(t)}')
+            self.core.write(f'SWE:TIME {t}')
         if gain is not None:
             if gain in (0, 1):
-                self.core.write(f'INP:GAIN:STAT {str(gain)}')
+                self.core.write(f'INP:GAIN:STAT {gain}')
         if att is not None:
-            self.core.write(f'INP:ATT {str(att)}')
+            self.core.write(f'INP:ATT {att}')
         self._f_ax = (f1, st, f2)
         self._check_registers()
 
@@ -105,7 +105,7 @@ class RsSpectrumAnalyzer:
         self._called = True
         self._status = 'Готов к работе.'
 
-    def get_data(self):
+    def get_data(self) -> tuple:
         try:
             freqs = np.arange(self._f_ax[0], self._f_ax[2]+self._f_ax[1], self._f_ax[1])
             data = self.core.query_binary_values('TRAC1:DATA?', datatype='f', container=np.ndarray)
