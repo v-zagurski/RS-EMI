@@ -1,3 +1,4 @@
+# type: ignore
 import sys
 import os
 import tempfile
@@ -187,13 +188,12 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
         fname_set, _ = QtWidgets.QFileDialog.getSaveFileName(
             self, 'Укажите имя файла', filter = 'Tab separated (*set.tab)')
         if fname_set:
+            if '.set.tab' not in fname_set:
+                fname_set += '.set.tab'
             for i in range(len(data_set.index)):
                 for j in range(self.tbl_scan.columnCount()-1):
                     data_set.iloc[i, j] = self.tbl_scan.item(i, j).text()
-            if '.set.tab' in fname_set:
-                data_set.to_csv(fname_set, sep='\t', index = False, header = False)
-            else:
-                data_set.to_csv(f'{fname_set}.set.tab', sep='\t', index = False, header = False)
+        data_set.to_csv(fname_set, sep='\t', index = False, header = False)
 
 class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
     def __init__(self):
@@ -302,8 +302,8 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     filter = 'Tab separated (*cal.tab)')
                 if fname_cal:
                     data_cal = pd.read_table(fname_cal, decimal=',')
-                    v_fk = data_cal['f'].values[:]
-                    v_k = data_cal['k'].values[:]
+                    v_fk = np.array(data_cal['f'].values[:])
+                    v_k = np.array(data_cal['k'].values[:])
                     v_cal = interext(v_freq, v_fk, v_k)
                     self.f_calib.setText(os.path.basename(fname_cal))
                     self.f_calib.setCursorPosition(0)
@@ -315,8 +315,8 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     filter = 'Tab separated (*cor.tab)')
                 if fname_cor:
                     data_cor = pd.read_table(fname_cor, decimal=',')
-                    v_fl = data_cor['f'].values[:]
-                    v_l = data_cor['l'].values[:]
+                    v_fl = np.array(data_cor['f'].values[:])
+                    v_l = np.array(data_cor['l'].values[:])
                     v_cor = interext(v_freq, v_fl, v_l)
                     self.f_corr.setText(os.path.basename(fname_cor))
                     self.f_corr.setCursorPosition(0)
@@ -328,8 +328,8 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     filter = 'Tab separated (*nor.tab)')
                 if fname_norm:
                     data_norm = pd.read_table(fname_norm, decimal=',')
-                    v_fnorm = data_norm['f'].values[:]
-                    v_vnorm = data_norm['a'].values[:]
+                    v_fnorm = np.array(data_norm['f'].values[:])
+                    v_vnorm = np.array(data_norm['a'].values[:])
                     self.f_norm.setText(os.path.basename(fname_norm))
                     self.f_norm.setCursorPosition(0)
                     self.ch_norm.setChecked(True)
@@ -341,24 +341,24 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
             case 0:
                if self.ch_calib.isChecked():
                    if data_cal is not None:
-                        v_fk = data_cal['f'].values[:]
-                        v_k = data_cal['k'].values[:]
+                        v_fk = np.array(data_cal['f'].values[:])
+                        v_k = np.array(data_cal['k'].values[:])
                         v_cal = interext(v_freq, v_fk, v_k)
                else:
                    v_cal = np.full(shape = len(v_freq), fill_value = 0)
             case 1:
                 if self.ch_corr.isChecked():
                     if data_cor is not None:
-                        v_fl = data_cor['f'].values[:]
-                        v_l = data_cor['l'].values[:]
+                        v_fl = np.array(data_cor['f'].values[:])
+                        v_l = np.array(data_cor['l'].values[:])
                         v_cor = interext(v_freq, v_fl, v_l)
                 else:
                     v_cor = np.full(shape = len(v_freq), fill_value = 0)
             case 2:
                 if self.ch_norm.isChecked():
                     if data_norm is not None:
-                        v_fnorm = data_norm['f'].values[:]
-                        v_vnorm = data_norm['a'].values[:]
+                        v_fnorm = np.array(data_norm['f'].values[:])
+                        v_vnorm = np.array(data_norm['a'].values[:])
                 else:
                   v_vnorm = np.full(shape = len(v_fnorm), fill_value = np.nan)
         self.plotdata()
@@ -487,6 +487,8 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
             self, 'Укажите имя файла', basedir + '/Результаты сканирования',
             filter = 'Tab separated (*.tab)')
         if fname:
+            if '.tab' not in fname:
+                fname += '.tab'
             match self.cmb_val.currentIndex():
                 case 0:
                     datf = pd.DataFrame({'freq, MHz': v_freq, 'val1': v_val1,
@@ -500,10 +502,7 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     datf = pd.DataFrame({'freq, MHz': v_freq, 'val1': v_val1,
                                             'val2': v_val2, 'val3': v_val3,
                                             'unit': 'dBuA'})
-            if '.tab' in fname:
-                datf.to_csv(fname, sep='\t', index=False, float_format='%.4f', decimal=',')
-            else:
-                datf.to_csv(f'{fname}.tab', sep='\t', index=False, float_format='%.4f', decimal=',')
+            datf.to_csv(fname, sep='\t', index=False, float_format='%.4f', decimal=',')
 
     def savejpg(self):
         fname, _ = QtWidgets.QFileDialog.getSaveFileName(
@@ -519,20 +518,20 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
             filter = 'Tab separated (*.tab)')
         if fname:
             datf = pd.read_table(fname, decimal=',')
-            v_freq = datf['freq, MHz'].values[:]
-            v_val1 = datf['val1'].values[:]
-            v_val2 = datf['val2'].values[:]
-            v_val3 = datf['val3'].values[:]
+            v_freq = np.array(datf['freq, MHz'].values[:])
+            v_val1 = np.array(datf['val1'].values[:])
+            v_val2 = np.array(datf['val2'].values[:])
+            v_val3 = np.array(datf['val3'].values[:])
             unit = datf['unit'].values[0]
             if data_cal is not None:
-                v_fk = data_cal['f'].values[:]
-                v_k = data_cal['k'].values[:]
+                v_fk = np.array(data_cal['f'].values[:])
+                v_k = np.array(data_cal['k'].values[:])
                 v_cal = interext(v_freq, v_fk, v_k)
             else:
                 v_cal = np.full(shape = len(v_freq), fill_value = 0)
             if data_cor is not None:
-                v_fl = data_cor['f'].values[:]
-                v_l = data_cor['l'].values[:]
+                v_fl = np.array(data_cor['f'].values[:])
+                v_l = np.array(data_cor['l'].values[:])
                 v_cor = interext(v_freq, v_fl, v_l)
             else:
                 v_cor = np.full(shape = len(v_freq), fill_value = 0)
@@ -580,9 +579,9 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                                         '9∙10\N{SUPERSCRIPT THREE}', '18∙10\N{SUPERSCRIPT THREE}'])
         self.sc.axes.tick_params(labelsize = 14, labelfontfamily = 'serif')
         self.sc.axes.tick_params(axis = 'x', which = 'minor', labelcolor = 'white')
-        self.sc.axes.set_ylim([self.gr_ax.sp_ymin.value(), self.gr_ax.sp_ymax.value()])
-        self.sc.axes.set_xlim([float(self.gr_ax.cmb_xmin.currentText()),
-                                float(self.gr_ax.cmb_xmax.currentText())])
+        self.sc.axes.set_ylim((self.gr_ax.sp_ymin.value(), self.gr_ax.sp_ymax.value()))
+        self.sc.axes.set_xlim((float(self.gr_ax.cmb_xmin.currentText()),
+                                float(self.gr_ax.cmb_xmax.currentText())))
         self.sc.axes.grid(True)
         self.sc.axes.format_coord = lambda x, y: "x = {:4.3F}\n y = {:3.2f}".format(x, y)
         if np.any(~np.isnan(v_val1)):
