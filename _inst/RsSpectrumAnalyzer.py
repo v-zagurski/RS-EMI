@@ -1,3 +1,4 @@
+# type: ignore
 import numpy as np
 from pyvisa.resources import MessageBasedResource
 from _inst.instmanager import InstrumentManager
@@ -16,9 +17,9 @@ class RsSpectrumAnalyzer:
     def __init__(self, res_string: str):
         self._str: str = res_string
         self.core: MessageBasedResource = im.open_inst(self._str)
-        self.core.timeout: int = 3000
-        self.core.write_termination: str = '\n'
-        self.core.read_termination: str = '\n'
+        self.core.timeout = 3000
+        self.core.write_termination = '\n'
+        self.core.read_termination = '\n'
         self.core.query('*ESE?')
         self.core.write('*ESE 61')
         self.core.write('STAT:QUES:POW:ENAB 4')
@@ -74,7 +75,7 @@ class RsSpectrumAnalyzer:
         f2 = float(self.core.query('SCAN:STOP?'))
         if step is not None and points is None:
             self.core.write(f'SCAN:STEP {step} kHz')
-        if points is not None and fstart is not None:
+        if all(var is not None for var in [points, fstart, fstop]):
             step = (fstop-fstart)*1e3/points
             self.core.write(f'SCAN:STEP {step} kHz')
         st = float(self.core.query('SCAN:STEP?'))
