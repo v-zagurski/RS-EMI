@@ -111,7 +111,8 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
 
         for i in range(len(data_set.index)):
             for j in range(self.tbl_scan.columnCount()):
-                self.tbl_scan.setItem(i, j, QtWidgets.QTableWidgetItem(data_set.iloc[i, j]))
+                if data_set.iloc[i, j] is not None:
+                    self.tbl_scan.setItem(i, j, QtWidgets.QTableWidgetItem(data_set.iloc[i, j]))
         self.b_load.clicked.connect(self.loadsettings)
         self.b_apply.clicked.connect(self.applysettings)
         self.b_save.clicked.connect(self.savetonew)
@@ -134,7 +135,8 @@ class EmiScanWindow(QtWidgets.QDialog, Ui_Settings):
             data_set = pd.read_table(fname_set, index_col = None, header = None, dtype = str)
             for i in range(len(data_set.index)):
                 for j in range(self.tbl_scan.columnCount()):
-                    self.tbl_scan.setItem(i, j, QtWidgets.QTableWidgetItem(data_set.iloc[i, j]))
+                    if data_set.iloc[i, j] is not None:
+                        self.tbl_scan.setItem(i, j, QtWidgets.QTableWidgetItem(data_set.iloc[i, j]))
 
     def applysettings(self):
         global check_list, nc, data_set, n, fstart
