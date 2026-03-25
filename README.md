@@ -6,3 +6,5 @@ Prerequisites:
 - Tested with R&S Spectrum Rider FPH
 
 In 'ru' branch you may find a russian version of the application. Feel free to inspect!
+
+Credit: PyVISA (https://github.com/pyvisa/pyvisa)
