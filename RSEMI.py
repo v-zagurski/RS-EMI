@@ -527,12 +527,14 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                 v_fk = np.array(data_cal['f'].values[:])
                 v_k = np.array(data_cal['k'].values[:])
                 v_cal = interext(v_freq, v_fk, v_k)
+                self.ch_calib.setChecked(True)
             else:
                 v_cal = np.full(shape = len(v_freq), fill_value = 0)
             if data_cor is not None:
                 v_fl = np.array(data_cor['f'].values[:])
                 v_l = np.array(data_cor['l'].values[:])
                 v_cor = interext(v_freq, v_fl, v_l)
+                self.ch_corr.setChecked(True)
             else:
                 v_cor = np.full(shape = len(v_freq), fill_value = 0)
             match unit:
