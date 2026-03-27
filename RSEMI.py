@@ -297,6 +297,8 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
                     case False:
                         self.f_settings.setText('Пользовательские')
                 self.f_settings.setCursorPosition(0)
+                self.ch_calib.setChecked(False)
+                self.ch_corr.setChecked(False)
             case 1:
                 global fname_cal, data_cal, v_cal
                 fname_cal, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Выберите файл cal.tab',
@@ -480,8 +482,6 @@ class EmiWindow(QtWidgets.QDialog, Ui_EmiWindow):
         v_cal = np.full(shape = len(v_freq), fill_value = 0)
         self.ch_calib.setChecked(False)
         self.ch_corr.setChecked(False)
-        self.f_corr.setText('')
-        self.f_calib.setText('')
         self.plotdata()
 
     def savetab(self):
